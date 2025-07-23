@@ -1,0 +1,242 @@
+// Fichier : prisma/schema.prisma
+
+// ---------------------------------------------------------------- //
+// 1. GÉNÉRATEUR CLIENT
+// Ce bloc indique à Prisma de générer le client Prisma, qui est
+// l'outil que vous utiliserez dans votre code Next.js pour interagir
+// avec la base de données.
+// ---------------------------------------------------------------- //
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ---------------------------------------------------------------- //
+// 2. SOURCE DE DONNÉES
+// Ici, nous configurons la connexion à la base de données.
+// - provider: "postgresql" spécifie le type de base de données.
+// - url: charge la chaîne de connexion depuis le fichier .env
+//   pour des raisons de sécurité.
+// ---------------------------------------------------------------- //
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------- //
+// 3. MODÈLES DE DONNÉES DE L'APPLICATION
+// Chaque bloc 'model' représente une table dans votre base de données.
+// ---------------------------------------------------------------- //
+
+// Modèle pour les livres disponibles à la personnalisation (catalogue).
+model Book {
+  id                 Int      @id @default(autoincrement())
+  title              String   @unique // Titre unique pour chaque livre
+  description        String   // Description longue du livre
+  shortDescription   String   // Courte description pour l'affichage dans les listes
+  coverImage         String   // URL de l'image de couverture du livre
+  price              Float    // Prix du livre en FCFA
+  tags               String[] // Tableau de tags/valeurs (ex: Famille, Entrepreneuriat)
+  pdfUrl             String?   // URL du PDF du livre (nullable)
+
+  createdAt          DateTime @default(now()) // Date de création de l'enregistrement
+  updatedAt          DateTime @updatedAt     // Date de la dernière mise à jour
+
+  // Relation : Un livre peut être associé à plusieurs commandes personnalisées.
+  personalizedOrders PersonalizedOrder[]
+  // Relation : Un livre peut être associé à plusieurs commandes non personnalisées (panier)
+  cartOrders CartOrder[]
+}
+
+// Modèle pour les valeurs éducatives que le livre peut transmettre.
+model Value {
+  id     Int    @id @default(autoincrement())
+  name   String @unique // Nom de la valeur (ex: Courage, Créativité)
+
+  // Relation : Une valeur peut être sélectionnée dans plusieurs commandes personnalisées.
+  orders PersonalizedOrder[]
+}
+
+// Modèle pour un personnage secondaire dans un livre personnalisé.
+model Character {
+  id                      Int      @id @default(autoincrement())
+  name                    String
+  relationshipToHero      String   // Ex: Père, Mère, Meilleur ami.e, Animal
+  animalType              String?  // Si 'relationshipToHero' est 'Animal'
+  sex                     String?  // Ex: Homme, Femme
+  age                     String?  // Tranche d'âge (ex: 3-5 ans, Adulte)
+  photoUrl                String?  // URL de la photo du personnage (optionnel)
+  
+  // Relation avec la commande personnalisée à laquelle ce personnage appartient.
+  personalizedOrderId     Int
+  personalizedOrder       PersonalizedOrder @relation(fields: [personalizedOrderId], references: [id], onDelete: Cascade)
+}
+
+// Modèle pour enregistrer une commande personnalisée d'un utilisateur.
+// Il rassemble toutes les informations du formulaire de personnalisation et de livraison.
+model PersonalizedOrder {
+  id              Int      @id @default(autoincrement())
+  childName       String   // Prénom du héros (enfant principal)
+  childPhotoUrl   String?  // URL de la photo de l'enfant principal (optionnel)
+  
+  generatedContent String? @db.Text // <-- CE CHAMP DOIT ÊTRE UNIQUE ICI. (Retiré de l'autre endroit)
+
+  // --- INFOS DE L'UTILISATEUR QUI COMMANDE ---
+  userFullName        String? // Nom complet de l'utilisateur qui commande
+  userPhoneNumber     String? // Numéro de téléphone de l'utilisateur (important pour mobile money)
+  // --- FIN INFOS UTILISATEUR ---
+
+  // --- INFOS DU HÉROS (ENFANT) ---
+  heroAgeRange        String? // Tranche d'âge de l'enfant (ex: "3-5 ans")
+  mainTheme           String? // Thème principal choisi (ex: "Aventure")
+  storyLocation       String? // Lieu de l'histoire (ex: "Mont Cameroun")
+  residentialArea     String? // Zone de résidence de l'enfant (ex: "Urbaine", "Rurale")
+  // --- FIN INFOS HÉROS ---
+
+  // --- PACK, LANGUES ET OPTIONNEL ---
+  packType            String? // Type de pack choisi (ex: "Basique", "Standard", "Prestige")
+  bookLanguages       String[] // Liste des langues choisies pour le livre (ex: ["Français", "Anglais"])
+  messageSpecial      String? // Message spécial pour le livre (optionnel)
+  // --- FIN PACK, LANGUES ET OPTIONNEL ---
+
+  // --- CHAMPS DE LIVRAISON ---
+  deliveryAddress     String? // Numéro et nom de rue, avenue, etc.
+  city                String? // Ville (ex: Yaoundé)
+  postalCode          String? // Code postal (si applicable au Cameroun)
+  country             String? // Pays (ex: Cameroun)
+  // --- FIN CHAMPS LIVRAISON ---
+
+  // --- STATUT ET PROGRESSION DE LECTURE ---
+  status              String   @default("IN_CART") // Statut de la commande: "PENDING", "COMPLETED", "CANCELLED","IN_CART"
+  readProgress        Int      @default(0)         // Progression de lecture pour le livre associé (0-100%)
+  // --- FIN STATUT ET PROGRESSION ---
+  
+  // --- NOUVEAUX CHAMPS POUR GESTION COMPLÈTE ---
+  calculatedPrice     Float    @default(0) // Prix calculé selon le pack et options
+  originalBookPrice   Float    @default(0) // Prix original du livre
+  uploadedImages      String[] // URLs des images uploadées (enfant + personnages)
+  personalizationData Json?    // Données complètes de personnalisation pour l'IA
+  // --- FIN NOUVEAUX CHAMPS ---
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt     
+
+  bookId              Int?
+  book                Book?    @relation(fields: [bookId], references: [id])
+  
+  selectedValues      Value[] // Valeurs éducatives choisies
+  paymentMethod  String?   // Méthode de paiement utilisée
+  paymentDetails String?   // Détails du paiement (peut être un JSON stringifié)
+  paidAt         DateTime? // Date/heure du paiement
+
+  userId              String?
+  user                User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guestToken          String?
+
+  type                String   @default("STANDARD") // Type de commande: 'STANDARD', 'PERSONALIZED', etc.
+
+  // Relation : Les personnages secondaires associés à cette commande.
+  characters          Character[]
+}
+
+// Modèle pour les commandes non personnalisées (panier classique)
+model CartOrder {
+  id          Int      @id @default(autoincrement())
+  bookId      Int
+  book        Book     @relation(fields: [bookId], references: [id])
+  quantity    Int      @default(1)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guestToken  String?
+  status      String   @default("IN_CART") // IN_CART, PENDING, PAID, CANCELLED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  paymentMethod  String?   // Méthode de paiement utilisée
+  paymentDetails String?   // Détails du paiement (JSON stringifié)
+  paidAt         DateTime? // Date/heure du paiement
+}
+
+// Modèle pour enregistrer les messages envoyés via le formulaire de contact.
+model ContactMessage {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String
+  phoneNumber String?  // Numéro de téléphone camerounais (optionnel)
+  message     String
+  createdAt   DateTime @default(now())
+}
+
+// ---------------------------------------------------------------- //
+// 4. MODÈLES REQUIS PAR NEXTAUTH.JS (pour l'authentification)
+// Ces modèles sont gérés par la bibliothèque NextAuth.js et sont
+// nécessaires pour stocker les utilisateurs, sessions, comptes OAuth, etc.
+// Ne les modifiez PAS à moins de savoir exactement ce que vous faites.
+// ---------------------------------------------------------------- //
+
+// Représente un compte utilisateur via un fournisseur (email/mdp, Google, etc.)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+// Représente une session active de l'utilisateur.
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Représente un utilisateur de l'application.
+model User {
+  id            String    @id @default(cuid())
+  name          String?   // Nom d'affichage de l'utilisateur
+  firstName     String?   // Prénom de l'utilisateur
+  lastName      String?   // Nom de famille de l'utilisateur
+  email         String?   @unique // L'email de l'utilisateur (unique)
+  phoneNumber   String?   @unique // Numéro de téléphone de l'utilisateur (unique)
+  emailVerified DateTime? // Date de vérification de l'email
+  image         String?   // URL de l'image de profil (avatar)
+  password      String?   @db.Text // Mot de passe haché de l'utilisateur (pour authentification par email/mdp)
+  
+  // Informations supplémentaires
+  birthDate     DateTime? // Date de naissance
+  address       String?   // Adresse
+  city          String?   // Ville
+  country       String?   // Pays
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[] // Comptes liés à cet utilisateur (ex: Google, Facebook)
+  sessions      Session[] // Sessions actives de cet utilisateur
+
+  // Relation : Les commandes personnalisées créées par cet utilisateur.
+  orders        PersonalizedOrder[]
+  // Relation : Les commandes non personnalisées créées par cet utilisateur.
+  cartOrders   CartOrder[]
+}
+
+// Utilisé pour les tokens de vérification (ex: pour l'authentification par email "lien magique")
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}

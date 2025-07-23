@@ -1,0 +1,88 @@
+/* src/app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.book-container {
+  perspective: 2000px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.book {
+  transform-style: preserve-3d;
+  transform-origin: left center;
+  animation: openBook 1.2s cubic-bezier(0.77,0,0.18,1) forwards;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  background: white;
+  border-radius: 1rem;
+}
+
+@keyframes openBook {
+  0% {
+    transform: rotateY(90deg) scale(0.95);
+    opacity: 0;
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+  }
+  60% {
+    opacity: 1;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+  100% {
+    transform: rotateY(0deg) scale(1);
+    opacity: 1;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+}
+
+.book-page-left, .book-page-right {
+  min-height: 100%;
+  width: 100%;
+}
+
+.book-page-right {
+  transform-origin: left center;
+  animation: turnPage 1.2s cubic-bezier(0.77,0,0.18,1) forwards;
+  backface-visibility: hidden;
+}
+
+@keyframes turnPage {
+  0% {
+    transform: rotateY(-100deg) scale(0.95);
+    opacity: 0;
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+  }
+  60% {
+    opacity: 1;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+  100% {
+    transform: rotateY(0deg) scale(1);
+    opacity: 1;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+}
+
+.book-page-left {
+  transform-origin: right center;
+  animation: turnPageLeft 1.2s cubic-bezier(0.77,0,0.18,1) forwards;
+  backface-visibility: hidden;
+}
+
+@keyframes turnPageLeft {
+  0% {
+    transform: rotateY(100deg) scale(0.95);
+    opacity: 0;
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+  }
+  60% {
+    opacity: 1;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+  100% {
+    transform: rotateY(0deg) scale(1);
+    opacity: 1;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+}

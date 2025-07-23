@@ -1,0 +1,57 @@
+{
+  "name": "trustfolio",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:whatsapp": "node scripts/start-with-whatsapp.js",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.10.0",
+    "@prisma/client": "^6.12.0",
+    "bcryptjs": "^3.0.2",
+    "drizzle-orm": "^0.44.3",
+    "framer-motion": "^12.23.6",
+    "lucide-react": "^0.525.0",
+    "next": "14.2.3",
+    "next-auth": "^4.24.11",
+    "next-themes": "^0.4.6",
+    "nodemailer": "^6.10.1",
+    "pdfjs-dist": "^3.11.174",
+    "pg": "^8.16.3",
+    "qrcode-terminal": "^0.12.0",
+    "react": "^18.3.1",
+    "react-confetti": "^6.4.0",
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.5.0",
+    "react-payment-logos": "^1.1.0",
+    "react-toastify": "^11.0.5",
+    "swiper": "^11.2.10",
+    "uuid": "^11.1.0",
+    "whatsapp-web.js": "^1.31.0",
+    "zustand": "^5.0.6"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/react-toastify": "^4.0.2",
+    "@types/uuid": "^10.0.0",
+    "autoprefixer": "^10.4.19",
+    "drizzle-kit": "^0.31.4",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.3",
+    "postcss": "^8.4.38",
+    "prisma": "^6.12.0",
+    "tailwindcss": "^3.4.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5"
+  },
+  "prisma": {
+    "seed": "ts-node --project tsconfig.seed.json prisma/seed.ts"
+  }
+}
