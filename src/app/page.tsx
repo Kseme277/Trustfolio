@@ -16,9 +16,10 @@ import Testimonials from '@/components/Testimonials'; // Section des témoignage
 import CallToAction from '@/components/CallToAction';   // Section d'appel à l'action finale
 import AnimateOnScroll from '@/components/AnimateOnScroll'; // Composant pour les animations au défilement
 import BookCardSkeleton from '@/components/BookCardSkeleton'; // Composant pour les indicateurs de chargement (utilisé quand le carrousel charge)
-import HorizontalBookCarousel from '@/components/HorizontalBookCarousel'; // <-- Le nouveau composant de carrousel horizontal
 import ClientHeroCarousel from '@/components/ClientHeroCarousel';
 import BookGrid from '@/components/BookGrid';
+import { useLanguage } from '@/components/LanguageProvider';
+import { TRANSLATIONS } from '@/i18n/translations';
 
 // --- Types ---
 // Définit la structure attendue d'un objet 'Book'
@@ -32,6 +33,8 @@ type Book = {
 
 // --- Composant de la Page d'Accueil ---
 export default function Home() {
+  const { lang } = useLanguage();
+  const t = TRANSLATIONS[lang];
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -65,17 +68,17 @@ export default function Home() {
           {/* Colonne de Gauche : Titre, Slogan et Boutons d'Action */}
           <div className="text-center md:text-left">
             <h1 className="text-4xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
-              Et si votre enfant devenait le <span className="text-orange-500">héros</span> de son propre livre ?
+              {t.heroTitle || 'Et si votre enfant devenait le '}<span className="text-orange-500">{t.heroWord || 'héros'}</span>{t.heroTitleSuffix || ' de son propre livre ?'}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-              Des livres 100% personnalisés, éducatifs et enracinés dans la culture africaine.
+              {t.heroSubtitle || 'Des livres 100% personnalisés, éducatifs et enracinés dans la culture africaine.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
               <Link href="/livres" className="bg-orange-500 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-orange-600 transition-all duration-300 transform hover:scale-105">
-                Personnaliser un livre
+                {t.customizeBook || 'Personnaliser un livre'}
               </Link>
               <Link href="/livres" className="bg-transparent border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-bold py-3 px-8 rounded-full text-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300">
-               Voir nos livres
+                {t.seeBooks || 'Voir nos livres'}
               </Link>
             </div>
           </div>
@@ -87,12 +90,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Section Livres Disponibles avec Animation d'entrée au défilement */}
-      <AnimateOnScroll>
-        <section id="available-books" className="w-full container mx-auto px-4 py-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-12 text-center">
-            Nos Livres Disponibles
+      {/* Section Livres Disponibles restaurée et modernisée */}
+      <section id="available-books" className="w-full max-w-7xl mx-auto px-4 py-16">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
+            {t.availableBooks || 'Nos Livres Disponibles'}
           </h2>
+          <Link href="/personaliser/1" className="bg-orange-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-orange-600 transition-all duration-300">
+            {t.customizeBook || 'Personnaliser un livre'}
+          </Link>
+        </div>
+        <div className="rounded-3xl bg-white/80 dark:bg-gray-900/80 shadow-xl p-6 md:p-10">
           {isLoading ? (
             <div className="flex justify-center">
               <BookCardSkeleton />
@@ -100,13 +108,48 @@ export default function Home() {
           ) : (
             <BookGrid books={books} />
           )}
-        </section>
-      </AnimateOnScroll>
-      
-      {/* Section Témoignages Clients avec Animation d'entrée au défilement */}
-      <AnimateOnScroll delay={0.25}>
-        <Testimonials />
-      </AnimateOnScroll>
+        </div>
+      </section>
+
+      {/* Section Commentaires modernisée */}
+      <section id="testimonials" className="w-full max-w-7xl mx-auto px-4 py-16">
+        <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-10 text-center">
+          {t.testimonialsTitle || 'Ils en parlent mieux que nous'}
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+          {/* Exemple de témoignage modernisé */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 flex flex-col items-center text-center">
+            <img src="/ines-murielle.jpg" alt="Témoin 1" className="w-16 h-16 rounded-full object-cover mb-4 border-2 border-orange-400" />
+            <blockquote className="text-lg italic text-gray-700 dark:text-gray-200 mb-2">
+              {t.testimonial1 || '“Une expérience incroyable, mon enfant a adoré son livre personnalisé !”'}
+            </blockquote>
+            <span className="font-semibold text-orange-500">Inès Murielle</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {t.parent || 'Parent'}
+            </span>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 flex flex-col items-center text-center">
+            <img src="/1753102053692-Anya-Bond-PC.jpg" alt="Témoin 2" className="w-16 h-16 rounded-full object-cover mb-4 border-2 border-orange-400" />
+            <blockquote className="text-lg italic text-gray-700 dark:text-gray-200 mb-2">
+              {t.testimonial2 || '“Le design, la personnalisation, tout est parfait. Je recommande à 100%.”'}
+            </blockquote>
+            <span className="font-semibold text-orange-500">Anya Bond</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {t.teacher || 'Enseignante'}
+            </span>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 flex flex-col items-center text-center">
+            <img src="/1753102238249-game_one_piece_pirate_hat_wallpaper_6bb11c3fe04958d81ee2ca7e58bf.jpg" alt="Témoin 3" className="w-16 h-16 rounded-full object-cover mb-4 border-2 border-orange-400" />
+            <blockquote className="text-lg italic text-gray-700 dark:text-gray-200 mb-2">
+              {t.testimonial3 || '“Enfin une plateforme qui valorise la culture africaine pour les enfants !”'}
+            </blockquote>
+            <span className="font-semibold text-orange-500">Jean-Marc K.</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {t.parent || 'Parent'}
+            </span>
+          </div>
+        </div>
+      </section>
       
       {/* Section Appel à l'Action Finale avec Animation d'entrée au défilement */}
       <AnimateOnScroll delay={0.25}>

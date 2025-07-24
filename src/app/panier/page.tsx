@@ -15,6 +15,8 @@ import { useCartStore } from '@/store/cartStore';
 import PaymentModal from '@/components/PaymentModal';
 import CartItem from '@/components/CartItem';
 import OrderDetailsModal from '@/components/OrderDetailsModal';
+import { useLanguage } from '@/components/LanguageProvider';
+import { TRANSLATIONS } from '@/i18n/translations';
 
 // Ajoute ce type utilitaire juste après les imports :
 type OrderWithType = Order & { _type?: 'PERSONALIZED' | 'STANDARD' };
@@ -33,6 +35,9 @@ export default function CartPage() {
   const router = useRouter();
   const { data: session, status: sessionStatus } = useSession();
   // const { decrement: decrementCartCount } = useCartStore();
+
+  const { lang } = useLanguage();
+  const t = TRANSLATIONS[lang];
 
   // Vérifier l'authentification par téléphone
   useEffect(() => {
@@ -187,20 +192,20 @@ export default function CartPage() {
     return (
       <div className="container mx-auto p-4 sm:p-8">
         <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md max-w-md mx-auto">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Votre Panier</h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">Veuillez vous connecter pour voir votre panier.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{t.yourCart}</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">{t.pleaseLogin}</p>
           <div className="space-y-3">
             <button 
               onClick={() => router.push('/connexion?callbackUrl=/panier')} 
               className="w-full bg-orange-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-orange-600 transition-colors"
             >
-              Se connecter
+              {t.login}
             </button>
             <button 
               onClick={() => router.push('/')} 
               className="w-full bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors"
             >
-              Retour à l'accueil
+              {t.backToHome}
             </button>
           </div>
         </div>
@@ -210,7 +215,7 @@ export default function CartPage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-8">
-      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-10 text-gray-900 dark:text-white">Votre Panier</h1>
+      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-10 text-gray-900 dark:text-white">{t.yourCart}</h1>
       {orders.length > 0 ? (
         <div className="max-w-4xl mx-auto">
           <div className="space-y-6">
@@ -262,22 +267,22 @@ export default function CartPage() {
           <div className="mt-10 flex flex-col items-end">
             <div className="text-right text-gray-800 dark:text-gray-200">
               <p className="text-2xl">Total : <span className="font-bold">{calculateTotal()} FCFA</span></p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Prêt à finaliser votre commande ?</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t.readyToFinalize}</p>
             </div>
             <button 
               onClick={handleOpenPaymentModal}
               disabled={isProcessingAction}
               className="mt-4 bg-orange-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Passer au paiement
+              {t.proceedToPayment}
             </button>
           </div>
         </div>
       ) : (
-        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-          <p className="text-xl text-gray-500 dark:text-gray-400">Votre panier est vide.</p>
+        <div className="text-center py-12 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md">
+          <p className="text-xl text-gray-500 dark:text-gray-400">{t.noBooks}</p>
           <Link href="/livres" className="mt-4 inline-block bg-orange-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-orange-600">
-            Explorer les livres
+            {t.books}
           </Link>
         </div>
       )}

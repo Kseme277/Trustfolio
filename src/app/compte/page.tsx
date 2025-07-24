@@ -10,6 +10,8 @@ import { useSession } from 'next-auth/react';
 import { toast } from 'react-toastify';
 import PaymentModal from '@/components/PaymentModal';
 import { Trash2 } from 'lucide-react'; // Import de l'icône poubelle
+import { useLanguage } from '@/components/LanguageProvider';
+import { TRANSLATIONS } from '@/i18n/translations';
 
 // Types
 type BookInfo = { title: string; coverImage: string; price: number; };
@@ -39,6 +41,8 @@ export default function AccountPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [phoneUser, setPhoneUser] = useState<any>(null);
   const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
+  const { lang } = useLanguage();
+  const t = TRANSLATIONS[lang];
 
   // Vérifier l'authentification par téléphone
   useEffect(() => {
@@ -273,35 +277,33 @@ export default function AccountPage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-8">
-      <header className="mb-8 sm:mb-10">
-        <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">Mon Profil</h1>
-        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300">
-          Bonjour, <span className="font-semibold">{currentUser?.name || currentUser?.email || 'Utilisateur'}</span> !
-        </p>
+      <header className="mb-10">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{t.account}</h1>
+        <p className="text-lg text-gray-600 dark:text-gray-300">{t.accountWelcome || 'Gérez vos informations et commandes.'}</p>
       </header>
 
       {/* Informations utilisateur */}
       <section className="mb-6 sm:mb-8">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white border-b border-gray-300 dark:border-gray-700 pb-3 mb-4 sm:mb-6">
-          Mes Informations
+          {t.myInformation}
         </h2>
         <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Nom</p>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{t.name}</p>
               <p className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">{currentUser?.name || 'Non renseigné'}</p>
             </div>
             <div>
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Email</p>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{t.email}</p>
               <p className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base break-all">{currentUser?.email || 'Non renseigné'}</p>
             </div>
             <div>
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Téléphone</p>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{t.phone}</p>
               <p className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">{currentUser?.phoneNumber || 'Non renseigné'}</p>
             </div>
             <div>
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Statut</p>
-              <p className="font-semibold text-green-600 dark:text-green-400 text-sm sm:text-base">Connecté</p>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{t.status}</p>
+              <p className="font-semibold text-green-600 dark:text-green-400 text-sm sm:text-base">{t.connected}</p>
             </div>
           </div>
         </div>
@@ -310,24 +312,24 @@ export default function AccountPage() {
       {/* Statistiques */}
       <section className="mb-6 sm:mb-8">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white border-b border-gray-300 dark:border-gray-700 pb-3 mb-4 sm:mb-6">
-          Mes Statistiques
+          {t.myStatistics}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md text-center">
             <div className="text-2xl sm:text-3xl font-bold text-orange-500">{userAllOrders.length}</div>
-            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total des commandes</div>
+            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t.totalOrders}</div>
           </div>
           <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md text-center">
             <div className="text-2xl sm:text-3xl font-bold text-blue-500">
               {userAllOrders.filter(order => order.status === 'COMPLETED').length}
             </div>
-            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Commandes complétées</div>
+            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t.completedOrders}</div>
           </div>
           <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md text-center">
             <div className="text-2xl sm:text-3xl font-bold text-yellow-500">
               {userPendingOrders.length}
             </div>
-            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">En attente</div>
+            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t.pendingOrders}</div>
           </div>
         </div>
       </section>
@@ -336,14 +338,14 @@ export default function AccountPage() {
       <section className="mb-6 sm:mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white border-b border-gray-300 dark:border-gray-700 pb-3">
-            Commandes en Attente
+            {t.pendingOrdersSection}
           </h2>
           {userPendingOrders.length > 0 && (
             <button
               onClick={handlePayAllOrders}
               className="mt-3 sm:mt-0 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
-              Payer toutes les commandes
+              {t.payAllOrders}
             </button>
           )}
         </div>
@@ -367,18 +369,18 @@ export default function AccountPage() {
                   </div>
                   <div className="flex-grow text-center sm:text-left">
                     <h3 className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg">{order.book?.title}</h3>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Pour : {order.childName}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">{t.forChild} {order.childName}</p>
                     {order.packType && (
-                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Pack : {order.packType}</p>
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">{t.pack} {order.packType}</p>
                     )}
                     {order.mainTheme && (
-                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Thème : {order.mainTheme}</p>
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">{t.theme} {order.mainTheme}</p>
                     )}
                     {order.calculatedPrice && (
-                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Prix : {order.calculatedPrice.toLocaleString()} FCFA</p>
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">{t.price} {order.calculatedPrice.toLocaleString()} FCFA</p>
                     )}
                     <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                      Date : {new Date(order.createdAt).toLocaleDateString('fr-FR')}
+                      {t.date} {new Date(order.createdAt).toLocaleDateString('fr-FR')}
                     </p>
                     <div className="mt-2 flex flex-col sm:flex-row items-center gap-2">
                       <span className={`inline-block px-2 py-1 text-xs rounded-full whitespace-nowrap ${
@@ -386,19 +388,19 @@ export default function AccountPage() {
                           ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
                           : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
                       }`}>
-                        {order.status === 'PENDING' ? 'En attente de paiement' : 'Dans le panier'}
+                        {order.status === 'PENDING' ? t.pendingPayment : t.inCart}
                       </span>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handlePayOrder(order)}
                           className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
                         >
-                          Payer cette commande
+                          {t.payThisOrder}
                         </button>
                         <button
                           onClick={() => handleDeleteOrder(order)}
                           className="bg-red-500 hover:bg-red-600 text-white p-1 rounded text-xs transition-colors"
-                          title="Supprimer cette commande"
+                          title={String(t.deleteOrder)}
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
@@ -410,14 +412,14 @@ export default function AccountPage() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-600 dark:text-gray-300 text-center sm:text-left">Vous n'avez aucune commande en attente de paiement.</p>
+          <p className="text-gray-600 dark:text-gray-300 text-center sm:text-left">{t.noPendingOrders}</p>
         )}
       </section>
 
       {/* Toutes les commandes */}
       <section>
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white border-b border-gray-300 dark:border-gray-700 pb-3 mb-4 sm:mb-6">
-          Toutes Mes Commandes
+          {t.allMyOrders}
         </h2>
         {isLoading ? (
           <div className="text-center p-10 text-gray-600 dark:text-gray-300">Chargement...</div>
@@ -439,9 +441,9 @@ export default function AccountPage() {
                   </div>
                   <div className="flex-grow text-center sm:text-left">
                     <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">{order.book?.title}</h3>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Pour : {order.childName}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">{t.forChild} {order.childName}</p>
                     <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                      Date : {new Date(order.createdAt).toLocaleDateString('fr-FR')}
+                      {t.date} {new Date(order.createdAt).toLocaleDateString('fr-FR')}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -453,14 +455,14 @@ export default function AccountPage() {
                           ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
                           : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
                       }`}>
-                        {order.status === 'COMPLETED' ? 'Terminée' : 
-                         order.status === 'PENDING' ? 'En attente' : 'Dans le panier'}
+                        {order.status === 'COMPLETED' ? t.completed : 
+                         order.status === 'PENDING' ? t.pending : t.inCart}
                       </span>
                     </div>
                     <button
                       onClick={() => handleDeleteOrder(order)}
                       className="bg-red-500 hover:bg-red-600 text-white p-1 rounded text-xs transition-colors"
-                      title="Supprimer cette commande"
+                      title={String(t.deleteOrder)}
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
@@ -470,7 +472,7 @@ export default function AccountPage() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-600 dark:text-gray-300 text-center sm:text-left">Vous n'avez pas encore de commandes.</p>
+          <p className="text-gray-600 dark:text-gray-300 text-center sm:text-left">{t.noOrdersYet}</p>
         )}
       </section>
 

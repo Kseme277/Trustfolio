@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
 import { Mail, Chrome } from 'lucide-react';
+import { useLanguage } from '@/components/LanguageProvider';
+import { TRANSLATIONS } from '@/i18n/translations';
 
 export default function LoginPage() {
   const [step, setStep] = useState<'phone' | 'code'>('phone');
@@ -15,6 +17,8 @@ export default function LoginPage() {
   const [rememberDevice, setRememberDevice] = useState(true);
   
   const router = useRouter();
+  const { lang, setLang } = useLanguage();
+  const t = TRANSLATIONS[lang];
 
   const formatPhoneNumber = (value: string) => {
     const cleaned = value.replace(/\D/g, '');
@@ -52,13 +56,13 @@ export default function LoginPage() {
     e.preventDefault();
     
     if (!phoneNumber || phoneNumber.replace(/\s/g, '').length < 9) {
-      toast.error('Veuillez entrer un numéro de téléphone valide (9 chiffres)');
+      toast.error(t.loginPhoneInvalid || 'Veuillez entrer un numéro de téléphone valide (9 chiffres)');
       return;
     }
 
     // Validation spécifique pour le Cameroun
     if (!validateCameroonPhone(phoneNumber)) {
-      toast.error('Format de numéro invalide. Utilisez un format camerounais (09, 6, 2, 3, 4, 5, 7, 8, 9 + 8 chiffres)');
+      toast.error(t.loginPhoneInvalidFormat || 'Format de numéro invalide. Utilisez un format camerounais (09, 6, 2, 3, 4, 5, 7, 8, 9 + 8 chiffres)');
       return;
     }
 
@@ -80,12 +84,12 @@ export default function LoginPage() {
       if (response.ok) {
         setIsCodeSent(true);
         setStep('code');
-        toast.success('Code envoyé sur WhatsApp !');
+        toast.success(t.loginCodeSent || 'Code envoyé sur WhatsApp !');
       } else {
-        toast.error(data.error || 'Erreur lors de l\'envoi du code');
+        toast.error(data.error || t.loginCodeError || 'Erreur lors de l\'envoi du code');
       }
     } catch (error) {
-      toast.error('Erreur lors de l\'envoi du code');
+      toast.error(t.loginCodeError || 'Erreur lors de l\'envoi du code');
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +98,7 @@ export default function LoginPage() {
   const handleCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code || code.length !== 6) {
-      toast.error('Veuillez entrer le code à 6 chiffres');
+      toast.error(t.loginCodeInvalid || 'Veuillez entrer le code à 6 chiffres');
       return;
     }
 
@@ -118,29 +122,35 @@ export default function LoginPage() {
       if (response.ok) {
         if (data.newUser) {
           // Nouvel utilisateur - rediriger vers l'inscription avec le numéro de téléphone
-          toast.info('Compte non trouvé. Redirection vers l\'inscription...');
+          toast.info(t.loginNewUserRedirect || 'Compte non trouvé. Redirection vers l\'inscription...');
           router.push(`/inscription?phone=${phoneNumber.replace(/\s/g, '')}`);
         } else {
           // Utilisateur existant - connexion réussie
-          toast.success('Connexion réussie !');
+          toast.success(t.loginSuccess || 'Connexion réussie !');
           console.log('LoginPage - User data to store:', data.user);
           
           // Sauvegarder les informations de l'utilisateur dans le localStorage
           if (data.user) {
             localStorage.setItem('phoneAuth', JSON.stringify(data.user));
-            console.log('LoginPage - Stored in localStorage:', localStorage.getItem('phoneAuth'));
-            // Déclencher un événement pour notifier les composants
             window.dispatchEvent(new Event('phone-auth-updated'));
+            // Récupération robuste du bookId
+            let bookId = '1';
+            if (typeof window !== 'undefined') {
+              const params = new URLSearchParams(window.location.search);
+              bookId = params.get('bookId') || localStorage.getItem('selectedBookId') || '1';
+            }
+            router.push(`/personaliser/${bookId}?step=2`);
+            return;
           }
           
           // Rediriger vers la page d'accueil
           router.push('/');
         }
       } else {
-        toast.error(data.error || 'Code incorrect');
+        toast.error(data.error || t.loginCodeIncorrect || 'Code incorrect');
       }
     } catch (error) {
-      toast.error('Erreur lors de la vérification du code');
+      toast.error(t.loginCodeError || 'Erreur lors de la vérification du code');
     } finally {
       setIsLoading(false);
     }
@@ -154,6 +164,16 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        {/* Sélecteur de langue */}
+        <div className="flex justify-end mb-4">
+          <select value={lang} onChange={e => setLang(e.target.value as any)} className="border rounded p-2">
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+            <option value="es">Español</option>
+            <option value="ar">العربية</option>
+          </select>
+        </div>
         {/* Logo TrustFolio */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
@@ -165,7 +185,7 @@ export default function LoginPage() {
             <span className="text-4xl font-bold text-orange-500">TrustFolio</span>
           </div>
           <p className="text-gray-600 dark:text-gray-400 text-sm">
-            Livres personnalisés pour enfants
+            {t.loginBooksSubtitle || 'Livres personnalisés pour enfants'}
           </p>
         </div>
 
@@ -177,30 +197,30 @@ export default function LoginPage() {
             <div className="space-y-6">
               <div className="text-center">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  Connexion
+                  {t.login}
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  Entrez votre numéro de téléphone pour continuer
+                  {t.loginPhoneSubtitle || 'Entrez votre numéro de téléphone pour continuer'}
                 </p>
               </div>
 
               <form onSubmit={handlePhoneSubmit} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Numéro de téléphone
+                    {t.loginPhoneLabel || 'Numéro de téléphone'}
                   </label>
                   <div className="relative">
                     <input
                       type="tel"
                       value={phoneNumber}
                       onChange={handlePhoneChange}
-                      placeholder="Ex: 09 12 34 56 78 ou 6 12 34 56 78"
+                      placeholder={Array.isArray(t.loginPhonePlaceholder) ? t.loginPhonePlaceholder[0] : t.loginPhonePlaceholder || 'Ex: 09 12 34 56 78 ou 6 12 34 56 78'}
                       className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       required
                     />
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Format camerounais: 09, 6, 2, 3, 4, 5, 7, 8, 9 + 8 chiffres
+                    {t.loginPhoneFormat || 'Format camerounais: 09, 6, 2, 3, 4, 5, 7, 8, 9 + 8 chiffres'}
                   </p>
                 </div>
 
@@ -212,19 +232,19 @@ export default function LoginPage() {
                   {isLoading ? (
                     <div className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Envoi en cours...
+                      {t.loginPhoneSending || 'Envoi en cours...'}
                     </div>
                   ) : (
-                    'Continuer'
+                    t.loginPhoneContinue || 'Continuer'
                   )}
                   </button>
               </form>
 
               <div className="text-center">
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  C'est votre première fois ici ?{' '}
+                  {t.loginFirstTime || "C'est votre première fois ici ?"}{' '}
                   <Link href="/inscription" className="text-orange-500 hover:text-orange-600 font-medium">
-                    Créer un compte
+                    {t.loginCreateAccount || 'Créer un compte'}
                   </Link>
                 </p>
               </div>
@@ -243,22 +263,22 @@ export default function LoginPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
-                <span className="ml-2 text-gray-500 dark:text-gray-400">Retour</span>
+                <span className="ml-2 text-gray-500 dark:text-gray-400">{t.loginBack || 'Retour'}</span>
               </div>
 
               <div className="text-center">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  Consulter votre boîte de réception
+                  {t.loginCheckInbox || 'Consulter votre boîte de réception'}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  Saisissez le code de sécurité à 6 chiffres que nous vous avons envoyé sur WhatsApp
+                  {t.loginEnterCodeSubtitle || 'Saisissez le code de sécurité à 6 chiffres que nous vous avons envoyé sur WhatsApp'}
                 </p>
               </div>
 
               <form onSubmit={handleCodeSubmit} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Code de sécurité
+                    {t.loginCodeLabel || 'Code de sécurité'}
                   </label>
                   <div className="flex justify-center space-x-2">
                     {Array.from({ length: 6 }).map((_, index) => (
@@ -328,7 +348,7 @@ export default function LoginPage() {
                     className="w-4 h-4 text-orange-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-orange-500 focus:ring-2"
                   />
                   <label htmlFor="remember" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                    Se souvenir de l'appareil
+                    {t.loginRememberDevice || "Se souvenir de l'appareil"}
                   </label>
                 </div>
 
@@ -340,10 +360,10 @@ export default function LoginPage() {
                   {isLoading ? (
                     <div className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Vérification...
+                      {t.loginCodeVerifying || 'Vérification...'}
                     </div>
                   ) : (
-                    'Continuer'
+                    t.loginPhoneContinue || 'Continuer'
                   )}
                 </button>
               </form>
@@ -356,7 +376,7 @@ export default function LoginPage() {
                   }}
                   className="text-orange-500 hover:text-orange-600 text-sm font-medium"
                 >
-                  Renvoyer le code
+                  {t.loginResendCode || 'Renvoyer le code'}
                 </button>
               </div>
             </div>
@@ -365,15 +385,15 @@ export default function LoginPage() {
 
         {/* Méthodes alternatives */}
         <div className="mt-6 text-center">
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">Autres méthodes de connexion</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">{t.loginOtherMethods || 'Autres méthodes de connexion'}</p>
           <div className="flex justify-center space-x-4">
             <button className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-gray-300 dark:border-gray-600 flex items-center gap-2">
               <Mail size={16} />
-              <span className="text-sm">Email</span>
+              <span className="text-sm">{t.loginWithEmail || 'Email'}</span>
             </button>
             <button className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-gray-300 dark:border-gray-600 flex items-center gap-2">
               <Chrome size={16} />
-              <span className="text-sm">Google</span>
+              <span className="text-sm">{t.loginWithGoogle || 'Google'}</span>
             </button>
           </div>
         </div>

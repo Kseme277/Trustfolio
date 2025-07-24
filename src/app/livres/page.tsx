@@ -6,10 +6,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import BookGrid from '@/components/BookGrid';
 import BookCardSkeleton from '@/components/BookCardSkeleton'; // Import des skeletons
+import { useLanguage } from '@/components/LanguageProvider';
+import { TRANSLATIONS } from '@/i18n/translations';
 
 // --- Types ---
 type Book = { id: number; title: string; shortDescription: string; coverImage: string; price: number; tags: string[]; };
-type Value = { id: number; name: string; };
+type Value = { id: number; name_fr?: string; name_en?: string; name_de?: string; name_es?: string; name_ar?: string; };
 
 export default function BooksPage() {
   const [allBooks, setAllBooks] = useState<Book[]>([]);
@@ -21,6 +23,9 @@ export default function BooksPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [priceLimit, setPriceLimit] = useState(100000);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  const { lang } = useLanguage();
+  const t = TRANSLATIONS[lang];
 
   // Chargement initial des données (livres et valeurs)
   useEffect(() => {
@@ -78,20 +83,20 @@ export default function BooksPage() {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8">
-      <h1 className="text-4xl font-bold text-center mb-8 text-gray-900 dark:text-white">Découvrez nos livres</h1>
+      <h1 className="text-4xl font-bold text-center mb-8 text-gray-900 dark:text-white">{t.booksPageTitle}</h1>
       
       <div className="flex flex-col md:flex-row gap-8">
         {/* Colonne de Gauche : Filtres */}
         <aside className="w-full md:w-1/4 lg:w-1/5 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md h-fit">
-          <h2 className="text-xl font-semibold mb-4 border-b pb-2 text-gray-900 dark:text-white">Filtres</h2>
+          <h2 className="text-xl font-semibold mb-4 border-b pb-2 text-gray-900 dark:text-white">{t.filtersTitle}</h2>
           
           {/* Filtre Recherche */}
           <div className="mb-6">
-            <label htmlFor="search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rechercher par titre</label>
+            <label htmlFor="search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.searchByTitleLabel}</label>
             <input 
               type="text" 
               id="search"
-              placeholder="Ex: Entrepreneur"
+              placeholder={Array.isArray(t.searchPlaceholder) ? t.searchPlaceholder[0] : t.searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500" 
@@ -100,7 +105,7 @@ export default function BooksPage() {
 
           {/* Filtre Prix */}
           <div className="mb-6">
-            <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prix maximum</label>
+            <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.priceLimitLabel}</label>
             <input 
               type="range"
               id="price"
@@ -116,24 +121,24 @@ export default function BooksPage() {
 
           {/* Filtre Genres/Valeurs (tags) avec cases à cocher */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valeurs / Genres</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.valuesGenresLabel}</label>
             <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
               {allValues.map(v => (
                 <label key={v.id} className="inline-flex items-center gap-2">
                   <input
                     type="checkbox"
-                    value={v.name}
-                    checked={selectedTags.includes(v.name)}
+                    value={v.name_fr}
+                    checked={selectedTags.includes(v.name_fr || '')}
                     onChange={e => {
                       if (e.target.checked) {
-                        setSelectedTags(prev => [...prev, v.name]);
+                        setSelectedTags(prev => [...prev, v.name_fr || '']);
                       } else {
-                        setSelectedTags(prev => prev.filter(tag => tag !== v.name));
+                        setSelectedTags(prev => prev.filter(tag => tag !== (v.name_fr || '')));
                       }
                     }}
                     className="accent-orange-500"
                   />
-                  <span>{v.name}</span>
+                  <span>{v[`name_${lang}`] || v.name_fr}</span>
                 </label>
               ))}
             </div>

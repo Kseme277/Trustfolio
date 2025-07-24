@@ -31,8 +31,18 @@ datasource db {
 model Book {
   id                 Int      @id @default(autoincrement())
   title              String   @unique // Titre unique pour chaque livre
-  description        String   // Description longue du livre
-  shortDescription   String   // Courte description pour l'affichage dans les listes
+  description        String   // Description longue du livre (FR par défaut, à migrer)
+  shortDescription   String   // Courte description (FR par défaut, à migrer)
+  description_fr     String?
+  description_en     String?
+  description_de     String?
+  description_es     String?
+  description_ar     String?
+  shortDescription_fr String?
+  shortDescription_en String?
+  shortDescription_de String?
+  shortDescription_es String?
+  shortDescription_ar String?
   coverImage         String   // URL de l'image de couverture du livre
   price              Float    // Prix du livre en FCFA
   tags               String[] // Tableau de tags/valeurs (ex: Famille, Entrepreneuriat)
@@ -50,7 +60,11 @@ model Book {
 // Modèle pour les valeurs éducatives que le livre peut transmettre.
 model Value {
   id     Int    @id @default(autoincrement())
-  name   String @unique // Nom de la valeur (ex: Courage, Créativité)
+  name_fr   String?
+  name_en   String?
+  name_de   String?
+  name_es   String?
+  name_ar   String?
 
   // Relation : Une valeur peut être sélectionnée dans plusieurs commandes personnalisées.
   orders PersonalizedOrder[]
@@ -221,7 +235,7 @@ model User {
   country       String?   // Pays
   
   createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  updatedAt     DateTime  @updatedAt @default(now())
 
   accounts      Account[] // Comptes liés à cet utilisateur (ex: Google, Facebook)
   sessions      Session[] // Sessions actives de cet utilisateur

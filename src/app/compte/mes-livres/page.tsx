@@ -75,24 +75,7 @@ export default function MyPersonalizedBooksPage() {
     return () => clearTimeout(timer);
   }, [isAuthenticated, sessionStatus, router, phoneUser]);
 
-  useEffect(() => {
-    // Attendre que l'authentification soit vérifiée
-    if (!hasCheckedAuth) return;
-    
-    if (sessionStatus === 'loading') return;
-    
-    // Ne redirige que si vraiment non authentifié ET que le statut est déterminé
-    if (!isAuthenticated && sessionStatus === 'unauthenticated' && !phoneUser) {
-      router.push('/connexion?callbackUrl=/compte/mes-livres');
-      return;
-    }
-
-    if (isAuthenticated) {
-      fetchUserOrders();
-      fetchCartOrders();
-    }
-  }, [isAuthenticated, sessionStatus, hasCheckedAuth, phoneUser, fetchUserOrders, fetchCartOrders]);
-
+  // Déclarer fetchUserOrders et fetchCartOrders AVANT le useEffect qui les utilise
   const fetchUserOrders = useCallback(async () => {
     if (!isAuthenticated || !currentUser?.id) return; // Ne charge pas si non connecté ou pas d'id
     setIsLoadingOrders(true);
@@ -118,10 +101,24 @@ export default function MyPersonalizedBooksPage() {
     }
   }, [isAuthenticated, currentUser]);
 
+  // useEffect qui utilise fetchUserOrders et fetchCartOrders
   useEffect(() => {
-    fetchUserOrders();
-    fetchCartOrders();
-  }, [fetchUserOrders, fetchCartOrders]);
+    // Attendre que l'authentification soit vérifiée
+    if (!hasCheckedAuth) return;
+    
+    if (sessionStatus === 'loading') return;
+    
+    // Ne redirige que si vraiment non authentifié ET que le statut est déterminé
+    if (!isAuthenticated && sessionStatus === 'unauthenticated' && !phoneUser) {
+      router.push('/connexion?callbackUrl=/compte/mes-livres');
+      return;
+    }
+
+    if (isAuthenticated) {
+      fetchUserOrders();
+      fetchCartOrders();
+    }
+  }, [isAuthenticated, sessionStatus, hasCheckedAuth, phoneUser, fetchUserOrders, fetchCartOrders]);
 
   // Gère la génération de contenu IA
   const handleGenerateContent = async (orderId: number) => {

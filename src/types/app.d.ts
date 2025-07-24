@@ -82,6 +82,7 @@ export type Order = {
   packType?: string | null;
   bookLanguages?: string[] | null;
   messageSpecial?: string | null;
+  pdfUrl?: string | null; // Ajout pour la gestion du PDF
 
   // Informations de paiement (ajoutées après le paiement)
   paymentMethod?: string | null;

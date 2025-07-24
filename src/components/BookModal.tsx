@@ -5,6 +5,8 @@ import { useSession } from 'next-auth/react'; // Pour la session (si nécessaire
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
 import { toast } from 'react-toastify';
+import { useLanguage } from '@/components/LanguageProvider';
+import { TRANSLATIONS } from '@/i18n/translations';
 
 export type Book = {
   id: number;
@@ -33,6 +35,8 @@ export default function BookModal({ open, onClose, book }: BookModalProps) {
   const { data: session, status } = useSession(); // Juste pour info, non utilisé pour auth token ici
   const router = useRouter();
   const [phoneUser, setPhoneUser] = useState<any>(null);
+  const { lang } = useLanguage();
+  const t = TRANSLATIONS[lang];
 
   // Vérifier l'authentification par téléphone
   useEffect(() => {
@@ -192,6 +196,11 @@ export default function BookModal({ open, onClose, book }: BookModalProps) {
     return () => { isMounted = false; };
   }, [showPdf, book?.pdfUrl]);
 
+  // Pour éviter les erreurs de typage, forcer la conversion en string :
+  const closeLabel = Array.isArray(t.close) ? t.close[0] : t.close;
+  const decreaseQuantityLabel = Array.isArray(t.decreaseQuantity) ? t.decreaseQuantity[0] : t.decreaseQuantity;
+  const increaseQuantityLabel = Array.isArray(t.increaseQuantity) ? t.increaseQuantity[0] : t.increaseQuantity;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-3xl w-full mx-4 sm:mx-8 p-6 relative flex flex-col md:flex-row gap-8 animate-fadeIn">
@@ -199,7 +208,7 @@ export default function BookModal({ open, onClose, book }: BookModalProps) {
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-red-500 focus:outline-none"
-          aria-label="Fermer"
+          aria-label={closeLabel}
         >
           &times;
         </button>
@@ -219,40 +228,40 @@ export default function BookModal({ open, onClose, book }: BookModalProps) {
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">{book.title}</h2>
           <div className="text-lg text-orange-500 font-semibold mb-4">{book.price} FCFA</div>
           <p className="text-gray-700 dark:text-gray-300 mb-6">
-            {book.description || book.shortDescription || 'Pas de description.'}
+            {book.description || book.shortDescription || t.noDescription}
           </p>
           {/* Quantité et bouton */}
           <div className="flex items-center gap-4 mb-2">
             <button
               onClick={() => setQuantity(q => Math.max(1, q - 1))}
               className="w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xl font-bold bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
-              aria-label="Diminuer la quantité"
+              aria-label={decreaseQuantityLabel}
             >-</button>
             <span className="w-8 text-center font-semibold text-lg">{quantity.toString().padStart(2, '0')}</span>
             <button
               onClick={() => setQuantity(q => q + 1)}
               className="w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xl font-bold bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
-              aria-label="Augmenter la quantité"
+              aria-label={increaseQuantityLabel}
             >+</button>
           </div>
           <button
             className="mt-4 bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors w-full"
             onClick={handleAddToCart}
           >
-            Ajouter au panier
+            {t.addToCart}
           </button>
           <div className="mt-3 flex flex-col sm:flex-row gap-3 w-full">
             <button
               onClick={() => setShowPdf(true)}
               className="flex-1 block text-center bg-orange-100 hover:bg-orange-200 text-orange-700 font-bold py-3 px-8 rounded-lg text-lg transition-colors"
             >
-              Voir 
+              {t.viewBook}
             </button>
             <Link
               href={`/personaliser/${book.id}`}
               className="flex-1 block text-center bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors"
             >
-              Personnaliser
+              {t.customizeBook}
             </Link>
           </div>
         </div>
@@ -264,7 +273,7 @@ export default function BookModal({ open, onClose, book }: BookModalProps) {
             <button
               onClick={() => setShowPdf(false)}
               className="absolute top-2 right-4 text-2xl text-gray-500 hover:text-red-500 focus:outline-none"
-              aria-label="Fermer"
+              aria-label={closeLabel}
             >
               &times;
             </button>
@@ -280,7 +289,9 @@ export default function BookModal({ open, onClose, book }: BookModalProps) {
                 onContextMenu={e => e.preventDefault()}
               />
               {loadingPdf ? (
-                <div className="flex items-center justify-center h-full text-gray-500">Chargement du livre...</div>
+                <div className="flex items-center justify-center h-full text-gray-500">
+                  {t.loadingBook}
+                </div>
               ) : (
                 <div className="flex flex-col items-center gap-4">
                   {pageImages.map((img, idx) => (
@@ -289,7 +300,9 @@ export default function BookModal({ open, onClose, book }: BookModalProps) {
                 </div>
               )}
             </div>
-            <p className="text-center text-gray-500 mt-2 text-sm">Lecture seule, téléchargement et impression désactivés.</p>
+            <p className="text-center text-gray-500 mt-2 text-sm">
+              {t.readOnly}
+            </p>
           </div>
         </div>
       )}

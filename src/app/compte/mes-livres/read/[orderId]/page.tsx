@@ -6,12 +6,26 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { toast } from 'react-toastify';
 import { ChevronLeft, ChevronRight } from 'lucide-react'; // Icônes de navigation
+import dynamic from 'next/dynamic';
+import { useLanguage } from '@/components/LanguageProvider';
 
 // Import des types depuis le fichier centralisé (app.d.ts)
 import { Order, BookInfo, ValueInfo, CharacterInfo } from '@/types/app.d'; 
 
 // La fonction generateBookContent n'est pas utilisée ici car le contenu vient de l'API/DB
 // import { generateBookContent } from '@/lib/bookContentGenerator'; 
+
+// Textes multilingues pour les actions PDF
+const PDF_LABELS = {
+  fr: { read: 'Lire le livre (PDF)', download: 'Télécharger le PDF', loading: 'Chargement du PDF...', error: 'Impossible d’afficher le PDF.' },
+  en: { read: 'Read the book (PDF)', download: 'Download PDF', loading: 'Loading PDF...', error: 'Unable to display PDF.' },
+  de: { read: 'Buch lesen (PDF)', download: 'PDF herunterladen', loading: 'PDF wird geladen...', error: 'PDF kann nicht angezeigt werden.' },
+  es: { read: 'Leer el libro (PDF)', download: 'Descargar PDF', loading: 'Cargando PDF...', error: 'No se puede mostrar el PDF.' },
+  ar: { read: 'قراءة الكتاب (PDF)', download: 'تحميل PDF', loading: 'جارٍ تحميل PDF...', error: 'تعذر عرض ملف PDF.' },
+};
+
+// Chargement dynamique de react-pdf (évite erreur SSR)
+const PDFViewer = dynamic(() => import('@/components/PDFViewer'), { ssr: false, loading: () => <div>Chargement du PDF...</div> });
 
 export default function ReadBookPage({ params }: { params: { orderId: string } }) {
   const { orderId } = params; // L'ID de la commande est récupéré des paramètres d'URL
@@ -101,11 +115,33 @@ export default function ReadBookPage({ params }: { params: { orderId: string } }
     setTimeout(() => saveProgress(newProgress), 1000); 
   }, [currentPageIndex, bookContentPages.length, saveProgress]); // Dépendances pour useCallback
 
+  const { lang } = useLanguage();
+
   // --- Conditions d'affichage initiales et de redirection ---
-  // Affiche un message de chargement tant que les données ne sont pas prêtes
-  if (isLoading || !order || bookContentPages.length === 0) return <div className="text-center p-10 text-xl text-gray-700 dark:text-gray-300">Chargement du livre...</div>;
-  // Redirige si la commande n'est pas au statut "COMPLETED" (payée et prête à être lue)
+  if (isLoading || !order) return <div className="text-center p-10 text-xl text-gray-700 dark:text-gray-300">Chargement du livre...</div>;
   if (order.status !== 'COMPLETED') return <div className="text-center p-10 text-xl text-red-500">Ce livre n'est pas encore prêt à être lu (statut: {order.status}).</div>;
+
+  // --- NOUVEAU : Si PDF disponible, afficher le lecteur PDF ---
+  if (order.pdfUrl) {
+    return (
+      <div className="container mx-auto p-4 sm:p-8">
+        <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8">
+          <button onClick={() => router.back()} className="text-gray-600 dark:text-gray-300 hover:text-orange-500 mb-6 flex items-center gap-1">
+            <ChevronLeft size={20} /> Retour
+          </button>
+          <h1 className="text-3xl font-bold text-center mb-6 text-gray-900 dark:text-white">{order.book?.title} - Pour {order.childName}</h1>
+          <div className="mb-6 flex justify-center">
+            <a href={order.pdfUrl} target="_blank" rel="noopener noreferrer" download className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-lg transition-colors">
+              {PDF_LABELS[lang as keyof typeof PDF_LABELS]?.download || PDF_LABELS.fr.download}
+            </a>
+          </div>
+          <div className="w-full min-h-[600px] flex justify-center items-center bg-gray-100 dark:bg-gray-900 rounded-lg overflow-hidden">
+            <PDFViewer fileUrl={order.pdfUrl} lang={lang} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Détermine le contenu de la page actuelle
   const currentPageContent = bookContentPages[currentPageIndex];

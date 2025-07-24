@@ -8,6 +8,13 @@ import './globals.css'; // Import des styles globaux (Tailwind CSS)
 import { ThemeProvider } from '@/components/ThemeProvider';
 import AuthProvider from '@/components/AuthProvider';
 import AuthLayout from '@/components/AuthLayout';
+import { LanguageProvider } from '@/components/LanguageProvider';
+import { SessionProvider } from 'next-auth/react';
+import ClientProviders from '@/components/ClientProviders';
+import Footer from '@/components/Footer';
+import FooterWrapper from '@/components/FooterWrapper';
+import React from 'react';
+import Header from '@/components/Header';
 
 // Configuration de la police Poppins
 const poppins = Poppins({ 
@@ -28,25 +35,15 @@ export const metadata: Metadata = {
 };
 
 // Composant RootLayout : la racine de votre application Next.js
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    // 'suppressHydrationWarning' est utilisé avec next-themes pour éviter un warning
-    // dû à une différence de classe (dark/light) entre le rendu serveur et client.
-    <html lang="fr" suppressHydrationWarning>
-      <body className={poppins.className}>
-        {/* AuthProvider enveloppe tout pour fournir le contexte d'authentification */}
-        <AuthProvider>
-          {/* ThemeProvider gère le basculement entre les thèmes clair/sombre */}
-          <ThemeProvider 
-            attribute="class" // Ajoute la classe 'dark' à l'élément <html> pour le thème sombre
-            defaultTheme="system" // Utilise le thème du système d'exploitation par défaut
-            enableSystem // Permet le basculement entre clair, sombre et le thème système
-          >
-            <AuthLayout>
-              {children}
-            </AuthLayout>
-          </ThemeProvider>
-        </AuthProvider>
+    <html lang="fr">
+      <body>
+        <ClientProviders>
+          <Header />
+          {children}
+          <FooterWrapper />
+        </ClientProviders>
       </body>
     </html>
   );
