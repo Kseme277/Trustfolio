@@ -7,12 +7,11 @@ export default function Footer() {
   const { lang } = useLanguage();
   const t = TRANSLATIONS[lang];
   return (
-    <footer className="w-full bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-16 py-10 px-4">
+    <footer className="bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-300 border-t border-gray-200 dark:border-gray-800 transition-colors duration-500">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
         {/* Logo ou nom */}
         <div className="flex items-center gap-3">
-          <img src="/Logo TrustFolio.png" alt="Trustfolio Logo" className="w-10 h-10 rounded-full object-cover border-2 border-orange-500 shadow-sm" />
-          <span className="text-2xl font-bold text-orange-500">Trustfolio</span>
+          <img src="/loho_trsutfolio.png" alt="Trustfolio Logo" className="w-24 h-24 rounded-full object-contain" />
         </div>
         {/* Liens principaux */}
         <nav className="flex flex-wrap gap-6 text-gray-700 dark:text-gray-200 text-base font-medium">

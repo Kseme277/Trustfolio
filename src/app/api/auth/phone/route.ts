@@ -198,6 +198,12 @@ export async function POST(request: Request) {
           phoneNumber: cleanPhone
         });
       }
+    } else if (action === 'check-user') {
+      // Vérifier si l'utilisateur existe
+      const user = await prisma.user.findFirst({
+        where: { phoneNumber: cleanPhone }
+      });
+      return NextResponse.json({ exists: !!user });
     }
 
     return NextResponse.json(

@@ -28,9 +28,9 @@ export const metadata: Metadata = {
     default: 'TrustFolio - Livres Personnalisés pour Enfants',
     template: '%s | TrustFolio', // Formatage du titre des pages
   },
-  description: 'Créez des livres 100% personnalisés, éducatifs et enracinés dans la culture africaine. Faites de votre enfant le héros de sa propre histoire.',
+  description: 'Créez des livres 100% personnalisés, éducatifs et enracinés dans votre culture africaine. Faites de votre enfant le héros de sa propre histoire.',
   icons: {
-    icon: '/Logo TrustFolio.png', // Chemin vers l'icône du site (dans le dossier public)
+    icon: '/logo_jpg.jpg', // Chemin vers l'icône du site (dans le dossier public)
   },
 };
 
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
-      <body>
+      <body className="bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-500">
         <ClientProviders>
           <Header />
           {children}

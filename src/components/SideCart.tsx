@@ -7,8 +7,10 @@ import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
 import CartItem from './CartItem';
 import { toast } from 'react-toastify';
-import { X, Trash2, Minus, Plus } from 'lucide-react';
+import { X, Trash2, Minus, Plus, CreditCard } from 'lucide-react';
 import PersonalizedCartItem from './PersonalizedCartItem';
+import { useLanguage } from './LanguageProvider';
+import { TRANSLATIONS } from '@/i18n/translations';
 
 export default function SideCart() {
   const { data: session, status } = useSession();
@@ -17,6 +19,8 @@ export default function SideCart() {
   const [phoneUser, setPhoneUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [personalizedOrders, setPersonalizedOrders] = useState<any[]>([]);
+  const { lang } = useLanguage();
+  const t = TRANSLATIONS[lang];
 
   // Debug: afficher les items dans la console
   useEffect(() => {
@@ -296,8 +300,8 @@ export default function SideCart() {
               </svg>
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Votre Panier</h2>
-              <p className="text-orange-100 text-sm">{(items.length + personalizedOrders.length)} article(s)</p>
+              <h2 className="text-xl font-bold text-white">{t.cart || 'Votre Panier'}</h2>
+              <p className="text-orange-100 text-sm">{(items.length + personalizedOrders.length)} {t.cartItems || 'article(s)'}</p>
             </div>
           </div>
           <button
@@ -317,8 +321,8 @@ export default function SideCart() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Votre panier est vide</h3>
-              <p className="text-gray-500 dark:text-gray-400">Ajoutez des livres pour commencer votre collection</p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t.cartEmpty || 'Votre panier est vide'}</h3>
+              <p className="text-gray-500 dark:text-gray-400">{t.cartEmptyHint || 'Ajoutez des livres pour commencer votre collection'}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -360,33 +364,24 @@ export default function SideCart() {
         {items.length > 0 && (
           <div className="border-t border-gray-200 dark:border-gray-700 p-6 bg-gray-50 dark:bg-gray-800">
             <div className="space-y-4">
-              {/* Bouton vider le panier */}
-              <button
-                onClick={handleClearCart}
-                disabled={isLoading}
-                className="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Vider le panier</span>
-              </button>
               
               {/* Résumé */}
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Sous-total (standards)</span>
+                <span className="text-gray-600 dark:text-gray-400">{t.cartSubtotalStandard || 'Sous-total (standards)'}</span>
                 <span className="font-semibold text-gray-900 dark:text-white">
                   {totalStandard.toLocaleString()} FCFA
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Sous-total (personnalisés)</span>
+                <span className="text-gray-600 dark:text-gray-400">{t.cartSubtotalPersonalized || 'Sous-total (personnalisés)'}</span>
                 <span className="font-semibold text-gray-900 dark:text-white">
                   {totalPersonalized.toLocaleString()} FCFA
                 </span>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Livraison</span>
-                <span className="font-semibold text-green-600">Gratuite</span>
+                <span className="text-gray-600 dark:text-gray-400">{t.cartDelivery || 'Livraison'}</span>
+                <span className="font-semibold text-green-600">{t.cartDeliveryFree || 'Gratuite'}</span>
               </div>
               
               <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
@@ -398,19 +393,29 @@ export default function SideCart() {
                 </div>
               </div>
               
-              {/* Bouton de commande */}
-              <button
-                onClick={handleCheckout}
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:transform-none"
-              >
-                {isAuthenticated ? 'Finaliser la commande' : 'Se connecter pour commander'}
-              </button>
+              {/* Boutons de commande */}
+              <div className="flex flex-col gap-4">
+                <button
+                  onClick={handleClearCart}
+                  disabled={isLoading}
+                  className="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-base"
+                >
+                  <Trash2 className="w-5 h-5" />
+                  Vider le panier
+                </button>
+                <button
+                  onClick={handleCheckout}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-extrabold text-lg py-5 px-8 rounded-full shadow-2xl transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-orange-300 focus:ring-offset-2 border-none drop-shadow-lg disabled:opacity-50 disabled:transform-none animate-bounce"
+                >
+                  <CreditCard className="w-7 h-7 animate-pulse" />
+                  <span className="tracking-wide">{isAuthenticated ? (t.payNow || 'Payer maintenant') : (t.loginToPay || 'Se connecter pour payer')}</span>
+                </button>
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+                  🔒 {t.securePayment || 'Paiement sécurisé'} • {t.cartDeliveryFree || 'Livraison gratuite'}
+                </p>
+              </div>
               
-              {/* Message de sécurité */}
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                🔒 Paiement sécurisé • Livraison gratuite
-              </p>
             </div>
           </div>
         )}

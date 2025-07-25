@@ -251,12 +251,6 @@ export default function BookModal({ open, onClose, book }: BookModalProps) {
             {t.addToCart}
           </button>
           <div className="mt-3 flex flex-col sm:flex-row gap-3 w-full">
-            <button
-              onClick={() => setShowPdf(true)}
-              className="flex-1 block text-center bg-orange-100 hover:bg-orange-200 text-orange-700 font-bold py-3 px-8 rounded-lg text-lg transition-colors"
-            >
-              {t.viewBook}
-            </button>
             <Link
               href={`/personaliser/${book.id}`}
               className="flex-1 block text-center bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors"
