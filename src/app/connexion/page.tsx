@@ -9,7 +9,7 @@ import { useLanguage } from '@/components/LanguageProvider';
 import { TRANSLATIONS } from '@/i18n/translations';
 
 export default function LoginPage() {
-  const [step, setStep] = useState<'phone' | 'code'>('phone');
+  const [step, setStep] = useState<'phone' | 'code' | 'confirm'>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -139,7 +139,7 @@ export default function LoginPage() {
               const params = new URLSearchParams(window.location.search);
               bookId = params.get('bookId') || localStorage.getItem('selectedBookId') || '1';
             }
-            router.push(`/personaliser/${bookId}?step=2`);
+            setStep('confirm');
             return;
           }
           
@@ -163,238 +163,276 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Sélecteur de langue */}
-        <div className="flex justify-end mb-4">
-          <select value={lang} onChange={e => setLang(e.target.value as any)} className="border rounded p-2">
-            <option value="fr">Français</option>
-            <option value="en">English</option>
-            <option value="de">Deutsch</option>
-            <option value="es">Español</option>
-            <option value="ar">العربية</option>
-          </select>
-        </div>
-        {/* Logo TrustFolio */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <img 
-              src="/Logo TrustFolio.png" 
-              alt="Logo TrustFolio" 
-              className="w-16 h-16 rounded-full object-cover border-4 border-orange-500 shadow-lg"
-            />
-            <span className="text-4xl font-bold text-orange-500">TrustFolio</span>
+      <div className="relative w-full max-w-md">
+        <img 
+          src="/logo_jpg.jpg" 
+          alt="Logo TrustFolio" 
+          className="absolute top-0 left-0 w-80 h-80 rounded-full object-contain mt-4 ml-4"
+        />
+        <div className="w-full max-w-md">
+          {/* Sélecteur de langue */}
+          <div className="flex justify-end mb-4">
+            <select value={lang} onChange={e => setLang(e.target.value as any)} className="border rounded p-2">
+              <option value="fr">Français</option>
+              <option value="en">English</option>
+              <option value="de">Deutsch</option>
+              <option value="es">Español</option>
+              <option value="ar">العربية</option>
+            </select>
           </div>
+          {/* Logo TrustFolio au-dessus du texte principal */}
+          <div className="flex justify-start mb-2">
+            <img 
+              src="/logo_jpg.jpg" 
+              alt="Logo TrustFolio" 
+              className="w-80 h-80 rounded-full object-contain"
+            />
+          </div>
+          {/* Texte principal */}
           <p className="text-gray-600 dark:text-gray-400 text-sm">
             {t.loginBooksSubtitle || 'Livres personnalisés pour enfants'}
           </p>
-        </div>
 
-        {/* Carte principale */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 border border-orange-200 dark:border-orange-800">
-          
-          {/* Étape 1: Numéro de téléphone */}
-          {step === 'phone' && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  {t.login}
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  {t.loginPhoneSubtitle || 'Entrez votre numéro de téléphone pour continuer'}
-                </p>
-              </div>
-
-              <form onSubmit={handlePhoneSubmit} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t.loginPhoneLabel || 'Numéro de téléphone'}
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={handlePhoneChange}
-                      placeholder={Array.isArray(t.loginPhonePlaceholder) ? t.loginPhonePlaceholder[0] : t.loginPhonePlaceholder || 'Ex: 09 12 34 56 78 ou 6 12 34 56 78'}
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {t.loginPhoneFormat || 'Format camerounais: 09, 6, 2, 3, 4, 5, 7, 8, 9 + 8 chiffres'}
+          {/* Carte principale */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 border border-orange-200 dark:border-orange-800">
+            
+            {/* Étape 1: Numéro de téléphone */}
+            {step === 'phone' && (
+              <div className="space-y-6">
+                <div className="text-center">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    {t.login}
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                    {t.loginPhoneSubtitle || 'Entrez votre numéro de téléphone pour continuer'}
                   </p>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={isLoading || !phoneNumber || phoneNumber.replace(/\s/g, '').length < 9}
-                  className="w-full bg-orange-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      {t.loginPhoneSending || 'Envoi en cours...'}
-                    </div>
-                  ) : (
-                    t.loginPhoneContinue || 'Continuer'
-                  )}
-                  </button>
-              </form>
-
-              <div className="text-center">
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  {t.loginFirstTime || "C'est votre première fois ici ?"}{' '}
-                  <Link href="/inscription" className="text-orange-500 hover:text-orange-600 font-medium">
-                    {t.loginCreateAccount || 'Créer un compte'}
-                  </Link>
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Étape 2: Code de vérification */}
-          {step === 'code' && (
-            <div className="space-y-6">
-              <div className="flex items-center mb-4">
-                <button
-                  onClick={() => setStep('phone')}
-                  className="text-gray-500 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <span className="ml-2 text-gray-500 dark:text-gray-400">{t.loginBack || 'Retour'}</span>
-              </div>
-
-              <div className="text-center">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  {t.loginCheckInbox || 'Consulter votre boîte de réception'}
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  {t.loginEnterCodeSubtitle || 'Saisissez le code de sécurité à 6 chiffres que nous vous avons envoyé sur WhatsApp'}
-                </p>
-              </div>
-
-              <form onSubmit={handleCodeSubmit} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    {t.loginCodeLabel || 'Code de sécurité'}
-                  </label>
-                  <div className="flex justify-center space-x-2">
-                    {Array.from({ length: 6 }).map((_, index) => (
+                <form onSubmit={handlePhoneSubmit} className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {t.loginPhoneLabel || 'Numéro de téléphone'}
+                    </label>
+                    <div className="relative">
                       <input
-                        key={index}
-                        type="text"
-                        maxLength={1}
-                        value={code[index] || ''}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          const newCode = code.split('');
-                          newCode[index] = value;
-                          setCode(newCode.join(''));
-                          
-                          // Passer au champ suivant si une valeur est entrée
-                          if (value && index < 5) {
-                            const inputs = (e.target as HTMLInputElement).parentElement?.querySelectorAll('input');
-                            if (inputs && inputs[index + 1]) {
-                              (inputs[index + 1] as HTMLInputElement).focus();
-                            }
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          // Permettre la navigation avec les flèches
-                          if (e.key === 'ArrowLeft' && index > 0) {
-                            const inputs = (e.target as HTMLInputElement).parentElement?.querySelectorAll('input');
-                            if (inputs && inputs[index - 1]) {
-                              (inputs[index - 1] as HTMLInputElement).focus();
-                            }
-                          } else if (e.key === 'ArrowRight' && index < 5) {
-                            const inputs = (e.target as HTMLInputElement).parentElement?.querySelectorAll('input');
-                            if (inputs && inputs[index + 1]) {
-                              (inputs[index + 1] as HTMLInputElement).focus();
-                            }
-                          } else if (e.key === 'Backspace' && !code[index] && index > 0) {
-                            // Revenir au champ précédent si on efface un champ vide
-                            const inputs = (e.target as HTMLInputElement).parentElement?.querySelectorAll('input');
-                            if (inputs && inputs[index - 1]) {
-                              (inputs[index - 1] as HTMLInputElement).focus();
-                            }
-                          }
-                        }}
-                        onPaste={(e) => {
-                          e.preventDefault();
-                          const pastedData = e.clipboardData.getData('text').slice(0, 6);
-                          if (/^\d{1,6}$/.test(pastedData)) {
-                            setCode(pastedData.padEnd(6, ''));
-                            // Focus sur le dernier champ rempli
-                            const inputs = (e.target as HTMLInputElement).parentElement?.querySelectorAll('input');
-                            if (inputs && inputs[pastedData.length]) {
-                              (inputs[pastedData.length] as HTMLInputElement).focus();
-                            }
-                          }
-                        }}
-                        className="w-12 h-12 text-center text-xl font-bold bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        type="tel"
+                        value={phoneNumber}
+                        onChange={handlePhoneChange}
+                        placeholder={Array.isArray(t.loginPhonePlaceholder) ? t.loginPhonePlaceholder[0] : t.loginPhonePlaceholder || 'Ex: 09 12 34 56 78 ou 6 12 34 56 78'}
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        required
                       />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="remember"
-                    checked={rememberDevice}
-                    onChange={(e) => setRememberDevice(e.target.checked)}
-                    className="w-4 h-4 text-orange-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-orange-500 focus:ring-2"
-                  />
-                  <label htmlFor="remember" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                    {t.loginRememberDevice || "Se souvenir de l'appareil"}
-                  </label>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading || code.length !== 6}
-                  className="w-full bg-gray-700 dark:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-600 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      {t.loginCodeVerifying || 'Vérification...'}
                     </div>
-                  ) : (
-                    t.loginPhoneContinue || 'Continuer'
-                  )}
-                </button>
-              </form>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {t.loginPhoneFormat || 'Format camerounais: 09, 6, 2, 3, 4, 5, 7, 8, 9 + 8 chiffres'}
+                    </p>
+                  </div>
 
-              <div className="text-center">
-                <button
-                  onClick={() => {
-                    setStep('phone');
-                    setCode('');
-                  }}
-                  className="text-orange-500 hover:text-orange-600 text-sm font-medium"
-                >
-                  {t.loginResendCode || 'Renvoyer le code'}
-                </button>
+                  <button
+                    type="submit"
+                    disabled={isLoading || !phoneNumber || phoneNumber.replace(/\s/g, '').length < 9}
+                    className="w-full bg-orange-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        {t.loginPhoneSending || 'Envoi en cours...'}
+                      </div>
+                    ) : (
+                      t.loginPhoneContinue || 'Continuer'
+                    )}
+                    </button>
+                </form>
+
+                <div className="text-center">
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                    {t.loginFirstTime || "C'est votre première fois ici ?"}{' '}
+                    <Link href="/inscription" className="text-orange-500 hover:text-orange-600 font-medium">
+                      {t.loginCreateAccount || 'Créer un compte'}
+                    </Link>
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
 
-        {/* Méthodes alternatives */}
-        <div className="mt-6 text-center">
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">{t.loginOtherMethods || 'Autres méthodes de connexion'}</p>
-          <div className="flex justify-center space-x-4">
-            <button className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-gray-300 dark:border-gray-600 flex items-center gap-2">
-              <Mail size={16} />
-              <span className="text-sm">{t.loginWithEmail || 'Email'}</span>
-            </button>
-            <button className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-gray-300 dark:border-gray-600 flex items-center gap-2">
-              <Chrome size={16} />
-              <span className="text-sm">{t.loginWithGoogle || 'Google'}</span>
-            </button>
+            {/* Étape 2: Code de vérification */}
+            {step === 'code' && (
+              <div className="space-y-6">
+                <div className="flex items-center mb-4">
+                  <button
+                    onClick={() => setStep('phone')}
+                    className="text-gray-500 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <span className="ml-2 text-gray-500 dark:text-gray-400">{t.loginBack || 'Retour'}</span>
+                </div>
+
+                <div className="text-center">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                    {t.loginCheckInbox || 'Consulter votre boîte de réception'}
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                    {t.loginEnterCodeSubtitle || 'Saisissez le code de sécurité à 6 chiffres que nous vous avons envoyé sur WhatsApp'}
+                  </p>
+                </div>
+
+                <form onSubmit={handleCodeSubmit} className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      {t.loginCodeLabel || 'Code de sécurité'}
+                    </label>
+                    <div className="flex justify-center space-x-2">
+                      {Array.from({ length: 6 }).map((_, index) => (
+                        <input
+                          key={index}
+                          type="text"
+                          maxLength={1}
+                          value={code[index] || ''}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            const newCode = code.split('');
+                            newCode[index] = value;
+                            setCode(newCode.join(''));
+                            
+                            // Passer au champ suivant si une valeur est entrée
+                            if (value && index < 5) {
+                              const inputs = (e.target as HTMLInputElement).parentElement?.querySelectorAll('input');
+                              if (inputs && inputs[index + 1]) {
+                                (inputs[index + 1] as HTMLInputElement).focus();
+                              }
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            // Permettre la navigation avec les flèches
+                            if (e.key === 'ArrowLeft' && index > 0) {
+                              const inputs = (e.target as HTMLInputElement).parentElement?.querySelectorAll('input');
+                              if (inputs && inputs[index - 1]) {
+                                (inputs[index - 1] as HTMLInputElement).focus();
+                              }
+                            } else if (e.key === 'ArrowRight' && index < 5) {
+                              const inputs = (e.target as HTMLInputElement).parentElement?.querySelectorAll('input');
+                              if (inputs && inputs[index + 1]) {
+                                (inputs[index + 1] as HTMLInputElement).focus();
+                              }
+                            } else if (e.key === 'Backspace' && !code[index] && index > 0) {
+                              // Revenir au champ précédent si on efface un champ vide
+                              const inputs = (e.target as HTMLInputElement).parentElement?.querySelectorAll('input');
+                              if (inputs && inputs[index - 1]) {
+                                (inputs[index - 1] as HTMLInputElement).focus();
+                              }
+                            }
+                          }}
+                          onPaste={(e) => {
+                            e.preventDefault();
+                            const pastedData = e.clipboardData.getData('text').slice(0, 6);
+                            if (/^\d{1,6}$/.test(pastedData)) {
+                              setCode(pastedData.padEnd(6, ''));
+                              // Focus sur le dernier champ rempli
+                              const inputs = (e.target as HTMLInputElement).parentElement?.querySelectorAll('input');
+                              if (inputs && inputs[pastedData.length]) {
+                                (inputs[pastedData.length] as HTMLInputElement).focus();
+                              }
+                            }
+                          }}
+                          className="w-12 h-12 text-center text-xl font-bold bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="remember"
+                      checked={rememberDevice}
+                      onChange={(e) => setRememberDevice(e.target.checked)}
+                      className="w-4 h-4 text-orange-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-orange-500 focus:ring-2"
+                    />
+                    <label htmlFor="remember" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                      {t.loginRememberDevice || "Se souvenir de l'appareil"}
+                    </label>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading || code.length !== 6}
+                    className="w-full bg-gray-700 dark:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-600 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        {t.loginCodeVerifying || 'Vérification...'}
+                      </div>
+                    ) : (
+                      t.loginPhoneContinue || 'Continuer'
+                    )}
+                  </button>
+                </form>
+
+                <div className="text-center">
+                  <button
+                    onClick={() => {
+                      setStep('phone');
+                      setCode('');
+                    }}
+                    className="text-orange-500 hover:text-orange-600 text-sm font-medium"
+                  >
+                    {t.loginResendCode || 'Renvoyer le code'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Étape 3: Confirmation du compte */}
+            {step === 'confirm' && (
+              <div className="space-y-6 text-center">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t.loginConfirmTitle || 'Confirmer votre numéro'}</h2>
+                <p className="text-gray-600 dark:text-gray-400 text-lg font-semibold mb-4">{phoneNumber}</p>
+                <div className="flex flex-col gap-4">
+                  <button
+                    className="w-full bg-orange-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    onClick={() => {
+                      let bookId = '1';
+                      if (typeof window !== 'undefined') {
+                        const params = new URLSearchParams(window.location.search);
+                        bookId = params.get('bookId') || localStorage.getItem('selectedBookId') || '1';
+                      }
+                      router.push(`/personaliser/${bookId}?step=2`);
+                    }}
+                  >
+                    {t.loginContinueWithNumber || 'Continuer avec ce numéro'}
+                  </button>
+                  <button
+                    className="w-full bg-gray-300 text-gray-800 py-3 px-4 rounded-lg font-medium hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    onClick={() => {
+                      setStep('phone');
+                      setPhoneNumber('');
+                      setCode('');
+                    }}
+                  >
+                    {t.loginChangeNumber || 'Changer de compte'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Méthodes alternatives */}
+          <div className="mt-6 text-center">
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">{t.loginOtherMethods || 'Autres méthodes de connexion'}</p>
+            <div className="flex justify-center space-x-4">
+              <button className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-gray-300 dark:border-gray-600 flex items-center gap-2">
+                <Mail size={16} />
+                <span className="text-sm">{t.loginWithEmail || 'Email'}</span>
+              </button>
+              <button className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-gray-300 dark:border-gray-600 flex items-center gap-2">
+                <Chrome size={16} />
+                <span className="text-sm">{t.loginWithGoogle || 'Google'}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

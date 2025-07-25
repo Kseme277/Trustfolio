@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { toast } from 'react-toastify';
 
 export type CartItem = {
   bookId: number;
@@ -39,6 +40,7 @@ export const useCartStore = create<CartState>()(
         } else {
           set({ items: [...items, item] });
         }
+        toast.success('Article ajouté au panier !');
       },
       addPersonalizedOrder: (orderId: number, calculatedPrice: number) => {
         const items = get().items;
@@ -50,6 +52,7 @@ export const useCartStore = create<CartState>()(
           calculatedPrice
         };
         set({ items: [...items, personalizedItem] });
+        toast.success('Article ajouté au panier !');
       },
       clear: () => set({ items: [] }),
       setItems: (items) => set({ items }),

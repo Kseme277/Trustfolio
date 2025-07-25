@@ -20,6 +20,8 @@ import ClientHeroCarousel from '@/components/ClientHeroCarousel';
 import BookGrid from '@/components/BookGrid';
 import { useLanguage } from '@/components/LanguageProvider';
 import { TRANSLATIONS } from '@/i18n/translations';
+import VirtuesBar from '@/components/VirtuesBar';
+import BookSelectModal from '@/components/BookSelectModal';
 
 // --- Types ---
 // Définit la structure attendue d'un objet 'Book'
@@ -37,6 +39,7 @@ export default function Home() {
   const t = TRANSLATIONS[lang];
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showBookSelect, setShowBookSelect] = useState(false);
 
   useEffect(() => {
     async function fetchBooks() {
@@ -74,7 +77,7 @@ export default function Home() {
               {t.heroSubtitle || 'Des livres 100% personnalisés, éducatifs et enracinés dans la culture africaine.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-              <Link href="/livres" className="bg-orange-500 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-orange-600 transition-all duration-300 transform hover:scale-105">
+              <Link href="#" onClick={e => { e.preventDefault(); setShowBookSelect(true); }} className="bg-orange-500 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-orange-600 transition-all duration-300 transform hover:scale-105">
                 {t.customizeBook || 'Personnaliser un livre'}
               </Link>
               <Link href="/livres" className="bg-transparent border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-bold py-3 px-8 rounded-full text-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300">
@@ -96,7 +99,7 @@ export default function Home() {
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
             {t.availableBooks || 'Nos Livres Disponibles'}
           </h2>
-          <Link href="/personaliser/1" className="bg-orange-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-orange-600 transition-all duration-300">
+          <Link href="#" onClick={e => { e.preventDefault(); setShowBookSelect(true); }} className="bg-orange-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-orange-600 transition-all duration-300">
             {t.customizeBook || 'Personnaliser un livre'}
           </Link>
         </div>
@@ -110,6 +113,9 @@ export default function Home() {
           )}
         </div>
       </section>
+
+      {/* Section Vertus */}
+      <VirtuesBar />
 
       {/* Section Commentaires modernisée */}
       <section id="testimonials" className="w-full max-w-7xl mx-auto px-4 py-16">
@@ -129,7 +135,7 @@ export default function Home() {
             </span>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 flex flex-col items-center text-center">
-            <img src="/1753102053692-Anya-Bond-PC.jpg" alt="Témoin 2" className="w-16 h-16 rounded-full object-cover mb-4 border-2 border-orange-400" />
+            <img src="/img.jpeg" alt="Témoin 2" className="w-16 h-16 rounded-full object-cover mb-4 border-2 border-orange-400" />
             <blockquote className="text-lg italic text-gray-700 dark:text-gray-200 mb-2">
               {t.testimonial2 || '“Le design, la personnalisation, tout est parfait. Je recommande à 100%.”'}
             </blockquote>
@@ -139,7 +145,7 @@ export default function Home() {
             </span>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 flex flex-col items-center text-center">
-            <img src="/1753102238249-game_one_piece_pirate_hat_wallpaper_6bb11c3fe04958d81ee2ca7e58bf.jpg" alt="Témoin 3" className="w-16 h-16 rounded-full object-cover mb-4 border-2 border-orange-400" />
+            <img src="/contes-africains.webp" alt="Témoin 3" className="w-16 h-16 rounded-full object-cover mb-4 border-2 border-orange-400" />
             <blockquote className="text-lg italic text-gray-700 dark:text-gray-200 mb-2">
               {t.testimonial3 || '“Enfin une plateforme qui valorise la culture africaine pour les enfants !”'}
             </blockquote>
@@ -155,6 +161,7 @@ export default function Home() {
       <AnimateOnScroll delay={0.25}>
         <CallToAction />
       </AnimateOnScroll>
+      {showBookSelect && <BookSelectModal open={showBookSelect} onClose={() => setShowBookSelect(false)} />}
     </div>
   );
 }

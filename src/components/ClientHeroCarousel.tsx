@@ -15,12 +15,6 @@ const slides = [
     badgeTitle: 'Impression premium',
     badgeText: 'Papier épais, couleurs éclatantes',
   },
-  {
-    src: '/enseignant-aidant-les-enfants-en-classe.jpg',
-    alt: 'Lecture en famille',
-    badgeTitle: 'Pour toute la famille',
-    badgeText: 'Des histoires qui rassemblent',
-  },
 ];
 
 export default function ClientHeroCarousel() {
@@ -33,11 +27,12 @@ export default function ClientHeroCarousel() {
   }, []);
 
   return (
-    <div className="relative w-full h-80 lg:h-96 flex items-center justify-center">
+    <div className="relative w-full h-64 sm:h-96 lg:h-[32rem] flex items-center justify-center">
       {slides.map((slide, idx) => (
         <div
           key={idx}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === current ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === current ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-100 z-0 pointer-events-none'} ${idx !== current && 'opacity-0'}`}
+          style={{ transitionProperty: 'opacity', pointerEvents: idx === current ? 'auto' : 'none' }}
         >
           <Image
             src={slide.src}

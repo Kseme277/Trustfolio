@@ -9,7 +9,7 @@ import { useLanguage } from '@/components/LanguageProvider';
 import { TRANSLATIONS } from '@/i18n/translations';
 
 export default function RegisterPage() {
-  const { lang } = useLanguage();
+  const { lang, setLang } = useLanguage();
   const t = TRANSLATIONS[lang];
   const [formData, setFormData] = useState({
     firstName: '',
@@ -35,15 +35,31 @@ export default function RegisterPage() {
     const address = searchParams.get('address') || '';
     const city = searchParams.get('city') || '';
     const country = searchParams.get('country') || 'Cameroun';
-    setFormData(prev => ({
-      ...prev,
-      phoneNumber: phoneFromUrl ? formatPhoneNumber(phoneFromUrl) : prev.phoneNumber,
-      firstName,
-      lastName,
-      address,
-      city,
-      country,
-    }));
+
+    // Pré-remplissage depuis localStorage (registerPrefill)
+    if (typeof window !== 'undefined') {
+      const prefill = localStorage.getItem('registerPrefill');
+      if (prefill) {
+        try {
+          const data = JSON.parse(prefill);
+          setFormData(prev => ({
+            ...prev,
+            phoneNumber: data.userPhoneNumber ? formatPhoneNumber(data.userPhoneNumber) : (phoneFromUrl ? formatPhoneNumber(phoneFromUrl) : prev.phoneNumber),
+            address: data.deliveryAddress || address,
+            city: data.city || city,
+            country: data.country || country,
+          }));
+        } catch {}
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          phoneNumber: phoneFromUrl ? formatPhoneNumber(phoneFromUrl) : prev.phoneNumber,
+          address,
+          city,
+          country,
+        }));
+      }
+    }
   }, [searchParams]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -141,20 +157,28 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo TrustFolio */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <img 
-              src="/Logo TrustFolio.png" 
-              alt="Logo TrustFolio" 
-              className="w-16 h-16 rounded-full object-cover border-4 border-orange-500 shadow-lg"
-            />
-            <span className="text-4xl font-bold text-orange-500">TrustFolio</span>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
-            {t.customBooks}
-          </p>
+        {/* Sélecteur de langue */}
+        <div className="flex justify-end mb-4">
+          <select value={lang} onChange={e => setLang(e.target.value as any)} className="border rounded p-2">
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+            <option value="es">Español</option>
+            <option value="ar">العربية</option>
+          </select>
         </div>
+        {/* Logo TrustFolio */}
+        <div className="flex justify-center mb-8">
+          <img 
+            src="/logo_jpg.jpg" 
+            alt="Logo TrustFolio" 
+            className="w-80 h-80 rounded-full object-contain"
+          />
+        </div>
+        {/* Texte principal */}
+        <p className="text-gray-600 dark:text-gray-400 text-sm">
+          {t.customBooks}
+        </p>
 
         {/* Carte principale */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 border border-orange-200 dark:border-orange-800">
