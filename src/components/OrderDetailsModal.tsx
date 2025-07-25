@@ -42,7 +42,12 @@ interface OrderDetailsModalProps {
   order: Order | null;
 }
 
+import { useLanguage } from '@/components/LanguageProvider';
+import { TRANSLATIONS } from '@/i18n/translations';
+
 export default function OrderDetailsModal({ isOpen, onClose, order }: OrderDetailsModalProps) {
+  const { lang } = useLanguage();
+  const t = TRANSLATIONS[lang];
   const [showPdf, setShowPdf] = useState(false);
   const [numPages, setNumPages] = useState<number>(0);
   const [pageImages, setPageImages] = useState<string[]>([]);
@@ -102,12 +107,12 @@ export default function OrderDetailsModal({ isOpen, onClose, order }: OrderDetai
           <X size={24} />
         </button>
         
-        <h2 className="text-2xl font-bold text-center mb-6">Détails de la Commande #{order.id}</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">{t.orderDetailsTitle || `Détails de la Commande #${order.id}`}</h2>
 
         <div className="space-y-4 text-gray-800 dark:text-gray-200 text-sm">
           {/* Section Livre et Enfant */}
           <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-md">
-            <h3 className="font-bold text-base mb-2">Livre & Héros</h3>
+            <h3 className="font-bold text-base mb-2">{t.orderDetailsBookHero || 'Livre & Héros'}</h3>
             <div className="flex items-center gap-4">
               {order.book && (
                 <div className="relative w-16 h-20 flex-shrink-0">
@@ -115,14 +120,14 @@ export default function OrderDetailsModal({ isOpen, onClose, order }: OrderDetai
                 </div>
               )}
               <div>
-                <p><strong>Titre:</strong> {order.book?.title}</p>
-                <p><strong>Pour:</strong> {order.childName}</p>
-                {order.heroAgeRange && <p><strong>Âge du héros:</strong> {order.heroAgeRange}</p>}
+                <p><strong>{t.orderDetailsBookTitle || 'Titre'}:</strong> {order.book?.title}</p>
+                <p><strong>{t.orderDetailsFor || 'Pour'}:</strong> {order.childName}</p>
+                {order.heroAgeRange && <p><strong>{t.orderDetailsHeroAge || 'Âge du héros'}:</strong> {order.heroAgeRange}</p>}
               </div>
             </div>
             {order.childPhotoUrl && (
               <div className="mt-2 text-center">
-                <Image src={order.childPhotoUrl} alt="Photo de l'enfant" width={80} height={80} className="rounded-full object-cover mx-auto" />
+                <Image src={order.childPhotoUrl} alt={t.orderDetailsChildPhotoAlt || "Photo de l'enfant"} width={80} height={80} className="rounded-full object-cover mx-auto" />
               </div>
             )}
           </div>
@@ -130,7 +135,7 @@ export default function OrderDetailsModal({ isOpen, onClose, order }: OrderDetai
           {/* Section Personnages Secondaires */}
           {order.characters && order.characters.length > 0 && (
             <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-md">
-              <h3 className="font-bold text-base mb-2">Personnages Secondaires</h3>
+              <h3 className="font-bold text-base mb-2">{t.orderDetailsSecondaryCharacters || 'Personnages Secondaires'}</h3>
               <div className="space-y-2">
                 {order.characters.map((char, index) => (
                   <div key={index} className="flex items-center gap-2">
@@ -144,32 +149,32 @@ export default function OrderDetailsModal({ isOpen, onClose, order }: OrderDetai
 
           {/* Section Valeurs et Thèmes */}
           <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-md">
-            <h3 className="font-bold text-base mb-2">Valeurs & Thèmes</h3>
-            <p><strong>Thème principal:</strong> {order.mainTheme || 'Non spécifié'}</p>
+            <h3 className="font-bold text-base mb-2">{t.orderDetailsValuesThemes || 'Valeurs & Thèmes'}</h3>
+            <p><strong>{t.orderDetailsMainTheme || 'Thème principal'}:</strong> {order.mainTheme || t.orderDetailsNotSpecified || 'Non spécifié'}</p>
             {(order.selectedValues?.length ?? 0) > 0 && (
-              <p><strong>Valeurs:</strong> {order.selectedValues!.map(v => v.name).join(', ')}</p>
+              <p><strong>{t.orderDetailsValues || 'Valeurs'}:</strong> {order.selectedValues!.map(v => v.name).join(', ')}</p>
             )}
-            {order.storyLocation && <p><strong>Lieu de l'histoire:</strong> {order.storyLocation}</p>}
-            {order.residentialArea && <p><strong>Zone de résidence:</strong> {order.residentialArea}</p>}
+            {order.storyLocation && <p><strong>{t.orderDetailsStoryLocation || "Lieu de l'histoire"}:</strong> {order.storyLocation}</p>}
+            {order.residentialArea && <p><strong>{t.orderDetailsResidentialArea || 'Zone de résidence'}:</strong> {order.residentialArea}</p>}
           </div>
 
           {/* Section Livraison */}
           {order.deliveryAddress && (
             <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-md">
-              <h3 className="font-bold text-base mb-2">Livraison</h3>
-              <p><strong>Adresse:</strong> {order.deliveryAddress}</p>
-              <p><strong>Ville:</strong> {order.city}, {order.postalCode} {order.country}</p>
-              <p><strong>Téléphone:</strong> {order.userPhoneNumber}</p>
+              <h3 className="font-bold text-base mb-2">{t.orderDetailsDelivery || 'Livraison'}</h3>
+              <p><strong>{t.orderDetailsAddress || 'Adresse'}:</strong> {order.deliveryAddress}</p>
+              <p><strong>{t.orderDetailsCity || 'Ville'}:</strong> {order.city}, {order.postalCode} {order.country}</p>
+              <p><strong>{t.orderDetailsPhone || 'Téléphone'}:</strong> {order.userPhoneNumber}</p>
             </div>
           )}
 
           {/* Section Paiement & Statut */}
           <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-md">
-            <h3 className="font-bold text-base mb-2">Paiement & Statut</h3>
-            <p><strong>Méthode:</strong> {order.paymentMethod || 'Non spécifié'}</p>
-            {order.paymentDetails && <p><strong>Détails:</strong> {order.paymentDetails}</p>}
-            <p><strong>Statut:</strong> {order.status}</p>
-            <p><strong>Date de commande:</strong> {new Date(order.createdAt).toLocaleDateString('fr-FR')}</p>
+            <h3 className="font-bold text-base mb-2">{t.orderDetailsPaymentStatus || 'Paiement & Statut'}</h3>
+            <p><strong>{t.orderDetailsPaymentMethod || 'Méthode'}:</strong> {order.paymentMethod || t.orderDetailsNotSpecified || 'Non spécifié'}</p>
+            {order.paymentDetails && <p><strong>{t.orderDetailsPaymentDetails || 'Détails'}:</strong> {order.paymentDetails}</p>}
+            <p><strong>{t.orderDetailsStatus || 'Statut'}:</strong> {order.status}</p>
+            <p><strong>{t.orderDetailsDate || 'Date de commande'}:</strong> {new Date(order.createdAt).toLocaleDateString(lang === 'fr' ? 'fr-FR' : lang === 'en' ? 'en-GB' : undefined)}</p>
           </div>
         </div>
         {/* Bouton pour voir le PDF si disponible */}
@@ -179,13 +184,13 @@ export default function OrderDetailsModal({ isOpen, onClose, order }: OrderDetai
               onClick={() => setShowPdf(true)}
               className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-lg text-lg transition-colors"
             >
-              Voir le livre PDF
+              {t.orderDetailsViewPdf || 'Voir le livre PDF'}
             </button>
           </div>
         )}
         <div className="flex justify-center mt-6">
           <button onClick={onClose} className="bg-orange-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-orange-600">
-            Fermer
+            {t.close || 'Fermer'}
           </button>
         </div>
         {/* Modal PDF sécurisé (images) */}
@@ -195,7 +200,7 @@ export default function OrderDetailsModal({ isOpen, onClose, order }: OrderDetai
               <button
                 onClick={() => setShowPdf(false)}
                 className="absolute top-2 right-4 text-2xl text-gray-500 hover:text-red-500 focus:outline-none"
-                aria-label="Fermer"
+                aria-label={t.close || 'Fermer'}
               >
                 &times;
               </button>
@@ -211,16 +216,16 @@ export default function OrderDetailsModal({ isOpen, onClose, order }: OrderDetai
                   onContextMenu={e => e.preventDefault()}
                 />
                 {loadingPdf ? (
-                  <div className="flex items-center justify-center h-full text-gray-500">Chargement du livre...</div>
+                  <div className="flex items-center justify-center h-full text-gray-500">{t.loadingBook || 'Chargement du livre...'}</div>
                 ) : (
                   <div className="flex flex-col items-center gap-4">
                     {pageImages.map((img, idx) => (
-                      <img key={idx} src={img} alt={`Page ${idx + 1}`} className="rounded shadow max-w-full select-none pointer-events-none" draggable={false} />
+                      <img key={idx} src={img} alt={`${t.orderDetailsPage || 'Page'} ${idx + 1}`} className="rounded shadow max-w-full select-none pointer-events-none" draggable={false} />
                     ))}
                   </div>
                 )}
               </div>
-              <p className="text-center text-gray-500 mt-2 text-sm">Lecture seule, téléchargement et impression désactivés.</p>
+              <p className="text-center text-gray-500 mt-2 text-sm">{t.readOnly || 'Lecture seule, téléchargement et impression désactivés.'}</p>
             </div>
           </div>
         )}

@@ -4,6 +4,8 @@
 import React from 'react';
 import Image from 'next/image';
 import { Order } from '@/types/app.d';
+import { useLanguage } from '@/components/LanguageProvider';
+import { TRANSLATIONS } from '@/i18n/translations';
 
 interface CartItemProps {
   order: Order & { _type?: 'PERSONALIZED' | 'STANDARD' };
@@ -21,6 +23,9 @@ export default function CartItem({ order, onDelete, isProcessingAction, onViewDe
     ? (order.childPhotoUrl || order.book?.coverImage || '/placeholder-book.jpg')
     : (order.book?.coverImage || '/placeholder-book.jpg');
 
+  const { lang } = useLanguage();
+  const t = TRANSLATIONS[lang];
+
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
       {/* Image du livre */}
@@ -32,9 +37,13 @@ export default function CartItem({ order, onDelete, isProcessingAction, onViewDe
           height={120}
           className="rounded-md object-cover"
         />
-        {isPersonalized && (
-          <span className="absolute top-1 left-1 bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded shadow">Personnalisé</span>
-        )}
+        <span className={`absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded ${order._type === 'PERSONALIZED' ? 'bg-orange-300 text-orange-900' : 'bg-orange-100 text-orange-700'}`}>
+          {order._type === 'PERSONALIZED'
+            ? t.personalizedLabel
+            : order._type === 'STANDARD'
+              ? t.standardLabel
+              : ''}
+        </span>
       </div>
 
       {/* Informations du livre */}

@@ -269,12 +269,29 @@ export default function CartPage() {
               <p className="text-2xl">Total : <span className="font-bold">{calculateTotal()} FCFA</span></p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t.readyToFinalize}</p>
             </div>
-            <button 
+            <button
               onClick={handleOpenPaymentModal}
               disabled={isProcessingAction}
-              className="mt-4 bg-orange-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-4 relative bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600 text-white font-bold py-3 px-12 rounded-full shadow-2xl border-2 border-orange-400 hover:from-orange-600 hover:to-orange-700 hover:shadow-orange-400/60 hover:scale-105 hover:ring-4 hover:ring-orange-200 transition-all duration-200 flex flex-col items-center gap-1 text-lg disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden"
             >
-              {t.proceedToPayment}
+              <span className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-6 h-6 group-hover:animate-bounce"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25v7.5A2.25 2.25 0 004.5 18h15a2.25 2.25 0 002.25-2.25v-7.5A2.25 2.25 0 0019.5 6h-15A2.25 2.25 0 002.25 8.25z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 9.75h19.5m-16.5 3h.008v.008h-.008v-.008zm3 0h.008v.008h-.008v-.008z" />
+                </svg>
+                {t.proceedToPayment}
+              </span>
+              <span className="text-xs text-orange-100 font-normal tracking-wide mt-1 drop-shadow-sm">
+                Paiement sécurisé
+              </span>
+              <span className="absolute inset-0 rounded-full pointer-events-none group-hover:shadow-[0_0_24px_8px_rgba(255,140,0,0.25)] transition-all duration-200"></span>
             </button>
           </div>
         </div>
