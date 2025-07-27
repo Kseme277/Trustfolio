@@ -15,6 +15,7 @@ import Footer from '@/components/Footer';
 import FooterWrapper from '@/components/FooterWrapper';
 import React from 'react';
 import Header from '@/components/Header';
+import FloatingCustomizeButton from '@/components/FloatingCustomizeButton';
 
 // Configuration de la police Poppins
 const poppins = Poppins({ 
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Header />
           {children}
           <FooterWrapper />
+          <FloatingCustomizeButton />
         </ClientProviders>
       </body>
     </html>

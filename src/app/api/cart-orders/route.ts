@@ -226,9 +226,14 @@ export async function DELETE(request: Request) {
       where.id = Number(id);
       console.log('Condition WHERE pour suppression unique:', where);
       
-      await prisma.cartOrder.delete({
+      const deleteResult = await prisma.cartOrder.deleteMany({
         where,
       });
+      
+      if (deleteResult.count === 0) {
+        console.log('Aucune commande trouvée pour suppression, mais on considère que c\'est OK');
+        return new NextResponse(null, { status: 204 });
+      }
     } else if (bookId) {
       // Sinon, chercher par bookId et supprimer toutes les occurrences
       where.bookId = Number(bookId);

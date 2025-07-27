@@ -148,14 +148,27 @@ export default function CartPage() {
     setOrders((prev) => prev.filter((order) => order.id !== orderId));
     // decrementCartCount(); // plus nécessaire
     try {
-      const res = await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
+      let deleteUrl = `/api/orders/${orderId}`;
+      if (session?.user?.id) {
+        deleteUrl += `?userId=${session.user.id}`;
+      } else if (phoneUser?.id) {
+        deleteUrl += `?phoneUserId=${phoneUser.id}`;
+      } else {
+        const guestToken = localStorage.getItem('guestToken');
+        if (guestToken) {
+          deleteUrl += `?guestToken=${guestToken}`;
+        }
+      }
+      const res = await fetch(deleteUrl, { method: 'DELETE' });
       if (!res.ok) throw new Error("La suppression a échoué.");
       toast.success("Article supprimé avec succès.");
+      // Synchroniser le cart de la navbar après suppression
+      window.dispatchEvent(new Event('cart-updated'));
     } catch (error: any) {
       toast.error(`Erreur lors de la suppression : ${error.message}. Restauration du panier.`);
       setOrders(originalOrders);
     } finally { setIsProcessingAction(false); }
-  }, [orders]); // <-- handleViewOrderDetails n'est PAS une dépendance de handleDelete
+  }, [orders, session, phoneUser]); // <-- handleViewOrderDetails n'est PAS une dépendance de handleDelete
 
   const handleOpenPaymentModal = () => {
     if (orders.length === 0) {
@@ -232,13 +245,26 @@ export default function CartPage() {
                     setOrders((prev) => prev.filter((o) => o.id !== orderId || o._type !== order._type));
                     try {
                       if (order._type === 'PERSONALIZED') {
-                        const res = await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
-                        if (!res.ok) throw new Error("La suppression a échoué.");
+                        let deleteUrl = `/api/orders/${orderId}`;
+                        if (session?.user?.id) {
+                          deleteUrl += `?userId=${session.user.id}`;
+                        } else if (phoneUser?.id) {
+                          deleteUrl += `?phoneUserId=${phoneUser.id}`;
+                        } else {
+                          const guestToken = localStorage.getItem('guestToken');
+                          if (guestToken) {
+                            deleteUrl += `?guestToken=${guestToken}`;
+                          }
+                        }
+                        const res = await fetch(deleteUrl, { method: 'DELETE' });
+                        if (!res.ok && res.status !== 404) throw new Error("La suppression a échoué.");
                       } else {
                         // Suppression pour CartOrder : on utilise DELETE sur /api/cart-orders avec l'id dans le body
                         let deleteUrl = `/api/cart-orders?id=${orderId}`;
                         if (session?.user?.id) {
                           deleteUrl += `&userId=${session.user.id}`;
+                        } else if (phoneUser?.id) {
+                          deleteUrl += `&phoneUserId=${phoneUser.id}`;
                         } else {
                           const guestToken = localStorage.getItem('guestToken');
                           if (guestToken) {
@@ -248,10 +274,16 @@ export default function CartPage() {
                         console.log('Suppression commande standard - URL:', deleteUrl);
                         const res = await fetch(deleteUrl, { method: 'DELETE' });
                         console.log('Réponse suppression:', res.status, res.statusText);
-                        if (!res.ok) throw new Error("La suppression a échoué.");
+                        if (!res.ok && res.status !== 404) throw new Error("La suppression a échoué.");
                       }
+                      // Synchroniser le cart de la navbar après suppression
+                      window.dispatchEvent(new Event('cart-updated'));
                     } catch (error: any) {
-                      setOrders(originalOrders);
+                      console.error('Erreur lors de la suppression:', error);
+                      // Ne restaure le panier que si ce n'est pas une erreur 404 (élément déjà supprimé)
+                      if (error.message && !error.message.includes('404')) {
+                        setOrders(originalOrders);
+                      }
                     } finally { setIsProcessingAction(false); }
                   }}
                   isProcessingAction={isProcessingAction}
@@ -272,7 +304,7 @@ export default function CartPage() {
             <button
               onClick={handleOpenPaymentModal}
               disabled={isProcessingAction}
-              className="mt-4 relative bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600 text-white font-bold py-3 px-12 rounded-full shadow-2xl border-2 border-orange-400 hover:from-orange-600 hover:to-orange-700 hover:shadow-orange-400/60 hover:scale-105 hover:ring-4 hover:ring-orange-200 transition-all duration-200 flex flex-col items-center gap-1 text-lg disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden"
+              className="mt-4 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center gap-1"
             >
               <span className="flex items-center gap-2">
                 <svg
@@ -281,17 +313,16 @@ export default function CartPage() {
                   viewBox="0 0 24 24"
                   strokeWidth="1.5"
                   stroke="currentColor"
-                  className="w-6 h-6 group-hover:animate-bounce"
+                  className="w-5 h-5"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25v7.5A2.25 2.25 0 004.5 18h15a2.25 2.25 0 002.25-2.25v-7.5A2.25 2.25 0 0019.5 6h-15A2.25 2.25 0 002.25 8.25z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 9.75h19.5m-16.5 3h.008v.008h-.008v-.008zm3 0h.008v.008h-.008v-.008z" />
                 </svg>
                 {t.proceedToPayment}
               </span>
-              <span className="text-xs text-orange-100 font-normal tracking-wide mt-1 drop-shadow-sm">
+              <span className="text-sm text-white font-medium">
                 Paiement sécurisé
               </span>
-              <span className="absolute inset-0 rounded-full pointer-events-none group-hover:shadow-[0_0_24px_8px_rgba(255,140,0,0.25)] transition-all duration-200"></span>
             </button>
           </div>
         </div>

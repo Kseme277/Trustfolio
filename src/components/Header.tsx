@@ -48,7 +48,7 @@ export default function Header() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [langMenuOpen]);
 
-  const { items } = useCartStore();
+  const { items, syncWithAPI } = useCartStore();
   const [personalizedOrdersCount, setPersonalizedOrdersCount] = useState(0);
 
   // Synchronise le nombre de commandes personnalisées avec la SideCart
@@ -92,6 +92,16 @@ export default function Header() {
     return () => window.removeEventListener('cart-updated', fetchPersonalizedOrdersCount);
   }, []);
 
+  // Synchronise aussi les commandes standards depuis l'API
+  useEffect(() => {
+    async function syncCart() {
+      await syncWithAPI();
+    }
+    syncCart();
+    window.addEventListener('cart-updated', syncCart);
+    return () => window.removeEventListener('cart-updated', syncCart);
+  }, [syncWithAPI]);
+
   // Le nombre exact de commandes = items.length (standards) + personalizedOrdersCount (personnalisées)
   const cartCount = items.length + personalizedOrdersCount;
 
@@ -110,11 +120,11 @@ export default function Header() {
   ];
 
   const flagList = [
-    { code: 'fr', src: 'https://flagcdn.com/w20/fr.png', alt: 'Français', label: 'Français' },
-    { code: 'en', src: 'https://flagcdn.com/w20/gb.png', alt: 'English', label: 'English' },
-    { code: 'de', src: 'https://flagcdn.com/w20/de.png', alt: 'Deutsch', label: 'Deutsch' },
-    { code: 'es', src: 'https://flagcdn.com/w20/es.png', alt: 'Español', label: 'Español' },
-    { code: 'ar', src: 'https://flagcdn.com/w20/sa.png', alt: 'العربية', label: 'العربية' },
+    { code: 'fr', src: 'https://flagcdn.com/w80/fr.png', alt: 'Français', label: 'Français' },
+    { code: 'en', src: 'https://flagcdn.com/w80/gb.png', alt: 'English', label: 'English' },
+    { code: 'de', src: 'https://flagcdn.com/w80/de.png', alt: 'Deutsch', label: 'Deutsch' },
+    { code: 'es', src: 'https://flagcdn.com/w80/es.png', alt: 'Español', label: 'Español' },
+    { code: 'ar', src: 'https://flagcdn.com/w80/sa.png', alt: 'العربية', label: 'العربية' },
   ];
 
   return (
@@ -124,15 +134,28 @@ export default function Header() {
         <Link href="/" className="flex items-center select-none">
           <img src="/loho_trsutfolio.png" alt="Trustfolio Logo" className="w-20 h-20 rounded-full object-contain" />
         </Link>
-        {/* Hamburger pour mobile */}
-        <button className="sm:hidden ml-2 p-2 rounded focus:outline-none focus:ring-2 focus:ring-orange-400" onClick={() => setMobileMenuOpen(true)} aria-label="Ouvrir le menu">
-          <Menu size={32} />
-        </button>
+        {/* Navigation mobile avec cart et thème */}
+        <div className="sm:hidden flex items-center gap-3">
+          <Link href="/panier" className="relative hover:text-orange-500 transition-colors" aria-label="Panier">
+            <ShoppingCart size={28} />
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold rounded-full px-2 py-0.5 shadow border-2 border-white dark:border-gray-900 z-10">
+                {cartCount}
+              </span>
+            )}
+          </Link>
+          <button onClick={toggleTheme} className="hover:text-orange-500 transition-colors" aria-label="Changer le thème">
+            {theme === 'dark' ? <Sun size={26} /> : <Moon size={26} />}
+          </button>
+          <button className="p-2 rounded focus:outline-none focus:ring-2 focus:ring-orange-400" onClick={() => setMobileMenuOpen(true)} aria-label="Ouvrir le menu">
+            <Menu size={32} />
+          </button>
+        </div>
         {/* Liens centraux + bouton + sélecteur de langue (desktop) */}
         <nav className="hidden sm:flex gap-10 items-center">
           <Link href="/" className="text-xl font-bold font-sans text-gray-800 dark:text-gray-200 hover:text-orange-500 transition-colors">{t.home || 'Accueil'}</Link>
           <Link href="/livres" className="text-xl font-bold font-sans text-gray-800 dark:text-gray-200 hover:text-orange-500 transition-colors">{t.books || t.shop || 'Boutique'}</Link>
-          <Link href="#" onClick={e => { e.preventDefault(); setShowBookSelect(true); }} className="bg-orange-500 hover:bg-orange-600 text-white font-bold font-sans px-8 py-3 rounded-lg text-base transition-colors">{t.customizeBook || 'Personnaliser'}</Link>
+          <Link href="#" onClick={e => { e.preventDefault(); setShowBookSelect(true); }} className="bg-orange-500 hover:bg-orange-600 text-white font-bold font-sans px-8 py-3 rounded-lg text-xl transition-colors">{t.customizeBook || 'Personnaliser'}</Link>
           <Link href="/a-propos" className="text-xl font-bold font-sans text-gray-800 dark:text-gray-200 hover:text-orange-500 transition-colors">{t.about || 'À propos'}</Link>
           {/* Sélecteur de langue custom (desktop) */}
           <div className="hidden sm:block ml-4 relative" ref={langMenuRef}>

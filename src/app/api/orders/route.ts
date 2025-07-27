@@ -326,15 +326,34 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user?.id) {
-      return new NextResponse('Non authentifié', { status: 401 });
-    }
+    const { searchParams } = new URL(request.url);
+    const guestToken = searchParams.get('guestToken');
+    const userId = searchParams.get('userId');
+    const phoneUserId = searchParams.get('phoneUserId');
 
     const orderId = Number(params.id);
+    let where: any = { id: orderId };
 
-    await prisma.personalizedOrder.delete({
-      where: { id: orderId, user: { id: session.user.id } },
+    // Priorité : session, puis phoneUserId, puis userId, puis guestToken
+    if (session && session.user?.id) {
+      where.user = { id: session.user.id };
+    } else if (phoneUserId) {
+      where.user = { id: phoneUserId };
+    } else if (userId) {
+      where.user = { id: userId };
+    } else if (guestToken) {
+      where.guestToken = guestToken;
+    } else {
+      return new NextResponse('Non authentifié et pas de guestToken', { status: 400 });
+    }
+
+    const deleteResult = await prisma.personalizedOrder.deleteMany({
+      where,
     });
+
+    if (deleteResult.count === 0) {
+      return new NextResponse("Commande non trouvée ou non autorisée.", { status: 404 });
+    }
 
     return new NextResponse(null, { status: 204 });
 

@@ -1027,7 +1027,7 @@ export default function PersonalizePage({ params }: { params: { id: string } }) 
   return (
     <div className="container mx-auto p-4 sm:p-8">
       {/* Sélecteur de langue */}
-      <div className="flex justify-end mb-4">
+      {/* <div className="flex justify-end mb-4">
         <select value={lang} onChange={e => setLang(e.target.value as Lang)} className="border rounded p-2">
           <option value="fr">Français</option>
           <option value="en">English</option>
@@ -1035,7 +1035,7 @@ export default function PersonalizePage({ params }: { params: { id: string } }) 
           <option value="es">Español</option>
           <option value="ar">العربية</option>
         </select>
-      </div>
+      </div> */}
       <h1 className="text-3xl sm:text-4xl font-bold text-center mb-4 text-gray-900 dark:text-white">{t.customizeBook || 'Personnalisez'} "{book.title}"</h1>
       <p className="text-center text-gray-600 dark:text-gray-300 mb-8 sm:mb-12">Créez une histoire unique, étape par étape.</p>
       
@@ -1063,40 +1063,40 @@ export default function PersonalizePage({ params }: { params: { id: string } }) 
 
       <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg">
         {/* Étape 1 */}
-        {step === 1 && (
+          {step === 1 && (
           <>
             {step1Status === 'form' && (
               <form onSubmit={handleStep1Submit}>
                 {/* ÉTAPE 1: Informations de l'utilisateur et livraison */}
-                <section className="space-y-4">
+            <section className="space-y-4">
                   <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-900 dark:text-white">{t.contact}</h2>
-                  <div>
+              <div>
                     <label htmlFor="userFullName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.fullName}</label>
                     <input type="text" id="userFullName" value={userFullName} onChange={(e) => setUserFullName(e.target.value)} required className="w-full p-3 border rounded-md dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-orange-500" placeholder={t.fullNamePlaceholder} />
-                  </div>
-                  <div>
+              </div>
+              <div>
                     <label htmlFor="userPhoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.phone}</label>
                     <input type="tel" id="userPhoneNumber" value={userPhoneNumber} onChange={(e) => setUserPhoneNumber(e.target.value)} required className="w-full p-3 border rounded-md dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-orange-500" placeholder={t.phonePlaceholder} pattern="^(09|6)\d{8}$" title={t.phoneTitle} />
-                  </div>
-                  <div>
+              </div>
+              <div>
                     <label htmlFor="deliveryAddress" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.address}</label>
                     <input type="text" id="deliveryAddress" value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} required className="w-full p-3 border rounded-md dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-orange-500" placeholder={t.addressPlaceholder} />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
                       <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.city}</label>
                       <input type="text" id="city" value={city} onChange={(e) => setCity(e.target.value)} required className="w-full p-3 border rounded-md dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-orange-500" placeholder={t.cityPlaceholder} />
-                    </div>
-                    <div>
+                </div>
+                <div>
                       <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.postal}</label>
                       <input type="text" id="postalCode" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} className="w-full p-3 border rounded-md dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-orange-500" placeholder={t.postalPlaceholder} />
-                    </div>
-                  </div>
-                  <div>
+                </div>
+              </div>
+              <div>
                     <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.country}</label>
                     <input type="text" id="country" value={country} onChange={(e) => setCountry(e.target.value)} required className="w-full p-3 border rounded-md dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-orange-500" placeholder={t.countryPlaceholder} />
-                  </div>
-                </section>
+              </div>
+            </section>
                 <div className="flex justify-end mt-8">
                   <button
                     type="submit"
@@ -1207,7 +1207,7 @@ export default function PersonalizePage({ params }: { params: { id: string } }) 
           </>
         )}
         {/* Étape 2 */}
-        {step === 2 && (
+          {step === 2 && (
           <form onSubmit={e => { e.preventDefault(); goToStep(step + 1); }}>
             <section className="space-y-4">
               <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-900 dark:text-white">{t.hero}</h2>
@@ -1274,10 +1274,10 @@ export default function PersonalizePage({ params }: { params: { id: string } }) 
               <button type="submit" disabled={isNextDisabled} className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-8 rounded-full">{t.next}</button>
             </div>
           </form>
-        )}
+          )}
 
-        {/* ÉTAPE 3: Pack et Personnages */}
-        {step === 3 && (
+          {/* ÉTAPE 3: Pack et Personnages */}
+          {step === 3 && (
           <form onSubmit={e => { e.preventDefault(); goToStep(step + 1); }}>
             <section className="space-y-6">
               <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Étape 3: Choix du Pack et Personnages</h2>
@@ -1376,10 +1376,10 @@ export default function PersonalizePage({ params }: { params: { id: string } }) 
               <button type="submit" disabled={isNextDisabled} className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-8 rounded-full">{t.next}</button>
             </div>
           </form>
-        )}
+          )}
 
-        {/* ÉTAPE 4: Langues et Valeurs */}
-        {step === 4 && (
+          {/* ÉTAPE 4: Langues et Valeurs */}
+          {step === 4 && (
           <form onSubmit={e => { e.preventDefault(); goToStep(step + 1); }}>
             <section className="space-y-6">
               <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-900 dark:text-white">{t.bookLanguagesTitle}</h2>
@@ -1426,10 +1426,10 @@ export default function PersonalizePage({ params }: { params: { id: string } }) 
               <button type="submit" disabled={isNextDisabled} className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-8 rounded-full">{t.next}</button>
             </div>
           </form>
-        )}
+          )}
 
-        {/* ÉTAPE 5: Message Spécial */}
-        {step === 5 && (
+          {/* ÉTAPE 5: Message Spécial */}
+          {step === 5 && (
           <form onSubmit={handleSubmit}>
             <section className="space-y-4">
               <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-900 dark:text-white">{t.messageTitle}</h2>
@@ -1445,11 +1445,11 @@ export default function PersonalizePage({ params }: { params: { id: string } }) 
                     <div className="flex items-center gap-2"><span>🏙️</span> <span>{storyArea}</span></div>
                     <div className="flex items-center gap-2"><span>📍</span> <span>{storyLocation}</span></div>
                     <div className="flex items-center gap-2"><span>📖</span> <span>{mainTheme}</span></div>
-                    {childPhotoUrl && (
+                {childPhotoUrl && (
                       <div className="flex items-center gap-2"><span>🖼️</span>
                         <img src={childPhotoUrl} alt="Photo héros" className="w-16 h-16 object-cover rounded-full border-2 border-orange-300 shadow" />
-                      </div>
-                    )}
+                  </div>
+                )}
                   </div>
                   <hr className="my-2" />
                 </section>
@@ -1465,10 +1465,10 @@ export default function PersonalizePage({ params }: { params: { id: string } }) 
                   <h5 className="font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2 mb-2">
                     <span>👥</span> {t.charactersField}
                   </h5>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {characters.map((char, i) => (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {characters.map((char, i) => (
                       <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg shadow">
-                        {char.photoUrl && (
+                            {char.photoUrl && (
                           <img src={char.photoUrl} alt={char.name} className="w-12 h-12 object-cover rounded-full border-2 border-gray-300" />
                         )}
                         <div className="space-y-1">
@@ -1478,10 +1478,10 @@ export default function PersonalizePage({ params }: { params: { id: string } }) 
                             <span>⚧️</span> {char.sex}
                             <span>🎂</span> {char.age}
                           </div>
-                        </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
                   <hr className="my-2" />
                 </section>
                 {/* Langues (Étape 4) */}
@@ -1493,7 +1493,7 @@ export default function PersonalizePage({ params }: { params: { id: string } }) 
                     {bookLanguages.map(lang => (
                       <span key={lang} className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-medium shadow">{lang}</span>
                     ))}
-                  </div>
+                    </div>
                 </section>
                 {/* Valeurs éducatives (Étape 4) */}
                 <section>
@@ -1529,11 +1529,11 @@ export default function PersonalizePage({ params }: { params: { id: string } }) 
                 )}
               </div>
             </section>
-            <div className="flex justify-between mt-8">
+          <div className="flex justify-between mt-8">
               <button type="button" onClick={() => goToStep(step - 1)} className="bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold py-2 px-6 rounded-lg">{t.prev}</button>
               <button type="submit" disabled={isSubmitting} className="bg-orange-600 text-white font-bold py-2 px-8 rounded-full disabled:bg-gray-400">{isSubmitting ? t.addingToCart : t.addCart}</button>
-            </div>
-          </form>
+          </div>
+        </form>
         )}
       </div>
     </div>

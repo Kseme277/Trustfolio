@@ -24,6 +24,7 @@ type CartState = {
   toggleCart: () => void;
   removeItem: (bookId: number, type?: string) => void;
   updateQuantity: (bookId: number, quantity: number) => void;
+  syncWithAPI: () => Promise<void>;
 };
 
 export const useCartStore = create<CartState>()(
@@ -70,6 +71,50 @@ export const useCartStore = create<CartState>()(
           item.bookId === bookId ? { ...item, quantity } : item
         );
         set({ items: updated });
+      },
+      syncWithAPI: async () => {
+        try {
+          let userId = null;
+          let guestToken = null;
+          if (typeof window !== 'undefined') {
+            const phoneAuth = localStorage.getItem('phoneAuth');
+            if (phoneAuth) {
+              try {
+                const userData = JSON.parse(phoneAuth);
+                userId = userData?.id;
+              } catch {}
+            }
+            if (!userId) {
+              guestToken = localStorage.getItem('guestToken');
+            }
+          }
+          
+          let url = '/api/cart-orders?status=IN_CART';
+          if (userId) url += `&userId=${userId}`;
+          else if (guestToken) url += `&guestToken=${guestToken}`;
+          else {
+            set({ items: [] });
+            return;
+          }
+          
+          const res = await fetch(url);
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data)) {
+              const cartItems = data.map((order: any) => ({
+                bookId: order.bookId,
+                title: order.book.title,
+                price: order.book.price,
+                coverImage: order.book.coverImage,
+                quantity: order.quantity,
+                type: 'STANDARD' as const
+              }));
+              set({ items: cartItems });
+            }
+          }
+        } catch (error) {
+          console.error('Erreur lors de la synchronisation du store:', error);
+        }
       },
     }),
     { name: 'cart-storage' }

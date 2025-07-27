@@ -244,12 +244,22 @@ export default function BookModal({ open, onClose, book }: BookModalProps) {
               aria-label={increaseQuantityLabel}
             >+</button>
           </div>
-          <button
-            className="mt-4 bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors w-full"
-            onClick={handleAddToCart}
-          >
-            {t.addToCart}
-          </button>
+          <div className="mt-4 flex flex-col sm:flex-row gap-3 w-full">
+            <button
+              className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors"
+              onClick={handleAddToCart}
+            >
+              {t.addToCart}
+            </button>
+            {book.pdfUrl && (
+              <button
+                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors"
+                onClick={() => setShowPdf(true)}
+              >
+                {t.viewBook || 'Voir le livre'}
+              </button>
+            )}
+          </div>
           <div className="mt-3 flex flex-col sm:flex-row gap-3 w-full">
             <Link
               href={`/personaliser/${book.id}`}
@@ -263,15 +273,23 @@ export default function BookModal({ open, onClose, book }: BookModalProps) {
       {/* Modal PDF (images) */}
       {showPdf && book.pdfUrl && (
         <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/70">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-3xl w-full mx-4 sm:mx-8 p-4 relative flex flex-col">
-            <button
-              onClick={() => setShowPdf(false)}
-              className="absolute top-2 right-4 text-2xl text-gray-500 hover:text-red-500 focus:outline-none"
-              aria-label={closeLabel}
-            >
-              &times;
-            </button>
-            <div className="w-full h-[70vh] relative overflow-y-auto" ref={pdfContainerRef}>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-4xl w-full mx-4 sm:mx-8 p-4 relative flex flex-col">
+            {/* Header du modal PDF */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                {book.title} - {t.viewBook || 'Voir le livre'}
+              </h3>
+              <button
+                onClick={() => setShowPdf(false)}
+                className="text-2xl text-gray-500 hover:text-red-500 focus:outline-none"
+                aria-label={closeLabel}
+              >
+                &times;
+              </button>
+            </div>
+            
+            {/* Zone de lecture */}
+            <div className="w-full h-[75vh] relative overflow-y-auto bg-gray-100 dark:bg-gray-800 rounded-lg" ref={pdfContainerRef}>
               {/* Overlay CSS pour bloquer le clic droit et impression */}
               <style>{`
                 .no-print { display: block !important; }
@@ -282,21 +300,39 @@ export default function BookModal({ open, onClose, book }: BookModalProps) {
                 style={{ pointerEvents: 'auto' }}
                 onContextMenu={e => e.preventDefault()}
               />
+              
               {loadingPdf ? (
-                <div className="flex items-center justify-center h-full text-gray-500">
-                  {t.loadingBook}
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+                    <p className="text-gray-500 dark:text-gray-400">{t.loadingBook}</p>
+                  </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-4">
+                <div className="flex flex-col items-center gap-6 p-4">
                   {pageImages.map((img, idx) => (
-                    <img key={idx} src={img} alt={`Page ${idx + 1}`} className="rounded shadow max-w-full select-none pointer-events-none" draggable={false} />
+                    <div key={idx} className="relative">
+                      <img 
+                        src={img} 
+                        alt={`Page ${idx + 1}`} 
+                        className="rounded-lg shadow-lg max-w-full select-none pointer-events-none border border-gray-200 dark:border-gray-600" 
+                        draggable={false} 
+                      />
+                      <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                        {idx + 1} / {pageImages.length}
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
             </div>
-            <p className="text-center text-gray-500 mt-2 text-sm">
-              {t.readOnly}
-            </p>
+            
+            {/* Footer avec informations */}
+            <div className="mt-4 text-center">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {t.readOnly} • {pageImages.length} {pageImages.length > 1 ? 'pages' : 'page'}
+              </p>
+            </div>
           </div>
         </div>
       )}

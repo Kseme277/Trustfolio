@@ -406,10 +406,10 @@ export default function SideCart() {
                 <button
                   onClick={handleCheckout}
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-extrabold text-lg py-5 px-8 rounded-full shadow-2xl transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-orange-300 focus:ring-offset-2 border-none drop-shadow-lg disabled:opacity-50 disabled:transform-none animate-bounce"
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-base disabled:opacity-50"
                 >
-                  <CreditCard className="w-7 h-7 animate-pulse" />
-                  <span className="tracking-wide">{isAuthenticated ? (t.payNow || 'Payer maintenant') : (t.loginToPay || 'Se connecter pour payer')}</span>
+                  <CreditCard className="w-5 h-5" />
+                  {isAuthenticated ? (t.payNow || 'Payer maintenant') : (t.loginToPay || 'Se connecter pour payer')}
                 </button>
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
                   🔒 {t.securePayment || 'Paiement sécurisé'} • {t.cartDeliveryFree || 'Livraison gratuite'}

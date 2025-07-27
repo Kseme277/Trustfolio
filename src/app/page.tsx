@@ -99,9 +99,7 @@ export default function Home() {
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
             {t.availableBooks || 'Nos Livres Disponibles'}
           </h2>
-          <Link href="#" onClick={e => { e.preventDefault(); setShowBookSelect(true); }} className="bg-orange-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-orange-600 transition-all duration-300">
-            {t.customizeBook || 'Personnaliser un livre'}
-          </Link>
+         
         </div>
         <div className="rounded-3xl bg-white/80 dark:bg-gray-900/80 shadow-xl p-6 md:p-10">
           {isLoading ? (
