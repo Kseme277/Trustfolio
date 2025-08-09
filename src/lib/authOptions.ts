@@ -1,12 +1,12 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { PrismaAdapter } from '@auth/prisma-adapter';
-import { PrismaClient } from '@prisma/client';
-import { NextAuthOptions } from 'next-auth';
-
-const prisma = new PrismaClient();
+import { DrizzleAdapter } from '@auth/drizzle-adapter/adapter';
+import type { NextAuthOptions } from '@auth/core';
+import { eq } from '@libsql/drizzle-orm';
+import { db } from '../db';
+import { users } from '../db/schema';
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: DrizzleAdapter(db),
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -14,14 +14,13 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials) {
+      async authorize(credentials: Record<"email" | "password", string> | undefined) {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
-        });
+        const userResult = await db.select().from(users).where(eq(users.email, credentials.email)).limit(1);
+        const user = userResult[0];
 
         if (!user) {
           return null;
@@ -57,4 +56,4 @@ export const authOptions: NextAuthOptions = {
       return session;
     }
   }
-}; 
+};

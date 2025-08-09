@@ -1,6 +1,8 @@
 // src/app/api/books/[id]/route.ts
 import { NextResponse } from 'next/server';
-import prisma from '../../../../../lib/prisma'; // Utilise le client partagé
+import { eq } from 'drizzle-orm';
+import { db } from '../../../../db';
+import { books } from '../../../../db/schema';
 
 // Le deuxième argument 'context' contient les paramètres de l'URL
 export async function GET(
@@ -10,12 +12,8 @@ export async function GET(
   const id = params.id;
 
   try {
-    const book = await prisma.book.findUnique({
-      where: {
-        // On convertit l'ID de l'URL (qui est une chaîne) en nombre
-        id: parseInt(id, 10),
-      },
-    });
+    const bookResult = await db.select().from(books).where(eq(books.id, parseInt(id, 10))).limit(1);
+    const book = bookResult[0];
 
     // Si aucun livre n'est trouvé, renvoyer une erreur 404
     if (!book) {

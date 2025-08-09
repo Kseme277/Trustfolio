@@ -1,0 +1,2 @@
+# Ce fichier permet de conserver le dossier uploads dans Git
+# Les fichiers uploadés par les utilisateurs ne sont pas versionnés pour des raisons de sécurité et de taille

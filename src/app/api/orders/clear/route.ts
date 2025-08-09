@@ -1,20 +1,19 @@
 import { NextResponse } from 'next/server';
-import prisma from '../../../../../lib/prisma';
-
+import { eq, desc, asc, and, or } from 'drizzle-orm';
+import { db } from '../../../../db';
+import { users, books, personalizedOrders, cartOrders, contactMessages, values, characters } from '../../../../db/schema';
 export async function DELETE(request: Request) {
-  const { searchParams } = new URL(request.url);
+  const { searchParams,  } = new URL(request.url);
   const guestToken = searchParams.get('guestToken');
   const userId = searchParams.get('userId');
-
-  let where: any = { status: 'IN_CART' };
+  let where: any = { status: 'IN_CART',  };
   if (userId) {
-    where.user = { id: userId };
+    where.user = { id: userId,  };
   } else if (guestToken) {
     where.guestToken = guestToken;
   } else {
     return new NextResponse('Non authentifié et pas de guestToken', { status: 400 });
   }
-
   try {
     await prisma.personalizedOrder.deleteMany({ where });
     return new NextResponse(null, { status: 204 });

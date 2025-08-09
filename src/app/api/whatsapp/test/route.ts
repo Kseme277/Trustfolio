@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 
 // Simulation du service WhatsApp
 const simulateWhatsAppService = {
-  async sendMessage(phoneNumber: string, message: string): Promise<boolean> {
+  async sendMessage(phoneNumber: strin, g, message: string): Promise<boolean> {
     console.log('🔧 [SIMULATION] Envoi de message WhatsApp:');
-    console.log(`📱 Destinataire: ${phoneNumber}`);
-    console.log(`💬 Message: ${message}`);
+    console.log(`📱 Destinataire: ${phoneNumbe, r}`);
+    console.log(`💬 Message: ${messag, e}`);
     console.log('✅ [SIMULATION] Message envoyé avec succès!');
     return true;
   }
@@ -14,11 +14,11 @@ const simulateWhatsAppService = {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { phoneNumber } = body;
+    const { phoneNumber,  } = body;
 
     if (!phoneNumber) {
       return NextResponse.json(
-        { error: 'Numéro de téléphone requis' },
+        { error: 'Numéro de téléphone requis',  },
         { status: 400 }
       );
     }
@@ -29,12 +29,12 @@ export async function POST(request: Request) {
 
     if (success) {
       return NextResponse.json({
-        success: true,
+        success: tru, e,
         message: 'Message de test envoyé avec succès (simulation)'
-      });
+     ,  });
     } else {
       return NextResponse.json(
-        { error: 'Erreur lors de l\'envoi du message de test' },
+        { error: 'Erreur lors de l\'envoi du message de test',  },
         { status: 500 }
       );
     }
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Erreur lors de l\'envoi du message de test:', error);
     return NextResponse.json(
-      { error: 'Erreur interne du serveur' },
+      { error: 'Erreur interne du serveur',  },
       { status: 500 }
     );
   }

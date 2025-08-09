@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { eq } from 'drizzle-orm';
+import { db } from '../../../../db';
+import { users } from '../../../../db/schema';
 import bcrypt from 'bcryptjs';
-
-const prisma = new PrismaClient();
 
 // Validation des données d'inscription
 const validateRegistrationData = (data: any) => {
   const errors: string[] = [];
-  // Champs requis : prénom, nom, téléphone
+  // Champs requis : préno, m, nom, téléphone
   if (!data.firstName?.trim()) errors.push('Prénom requis');
   if (!data.lastName?.trim()) errors.push('Nom requis');
   if (!data.phoneNumber?.trim()) errors.push('Numéro de téléphone requis');
@@ -27,7 +27,7 @@ const validateRegistrationData = (data: any) => {
 
 // Nettoyer le numéro de téléphone
 const cleanPhoneNumber = (phoneNumber: string) => {
-  return phoneNumber.replace(/\D/g, '');
+  return phoneNumber.replace(/\D/, g, '');
 };
 
 // Normaliser l'email
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const {
-      firstName,
+      firstNam, e,
       lastName,
       email,
       phoneNumber,
@@ -52,9 +52,9 @@ export async function POST(request: Request) {
     if (validationErrors.length > 0) {
       return NextResponse.json(
         { 
-          error: 'Données invalides',
+          error: 'Données invalides, ',
           details: validationErrors 
-        },
+       ,  },
         { status: 400 }
       );
     }
@@ -65,58 +65,52 @@ export async function POST(request: Request) {
     const cleanLastName = lastName.trim();
     // Vérifier si l'email existe déjà (si fourni)
     if (normalizedEmail) {
-      const existingUserByEmail = await prisma.user.findFirst({
-        where: { email: normalizedEmail }
-      });
-      if (existingUserByEmail) {
+      const existingUserByEmail = await db.select().from(users).where(eq(users.email, normalizedEmail)).limit(1);
+      if (existingUserByEmail.length > 0) {
         return NextResponse.json(
-          { error: 'Un compte avec cet email existe déjà' },
+          { error: 'Un compte avec cet email existe déjà',  },
           { status: 409 }
         );
       }
     }
     // Vérifier si le numéro de téléphone existe déjà
-    const existingUserByPhone = await prisma.user.findFirst({
-      where: { phoneNumber: cleanPhone }
-    });
-    if (existingUserByPhone) {
+    const existingUserByPhone = await db.select().from(users).where(eq(users.phoneNumber, cleanPhone)).limit(1);
+    if (existingUserByPhone.length > 0) {
       return NextResponse.json(
-        { error: 'Un compte avec ce numéro de téléphone existe déjà' },
+        { error: 'Un compte avec ce numéro de téléphone existe déjà',  },
         { status: 409 }
       );
     }
     // Créer l'utilisateur (sans mot de passe, ni birthDate)
-    const newUser = await prisma.user.create({
-      data: {
-        firstName: cleanFirstName,
-        lastName: cleanLastName,
-        email: normalizedEmail || null,
-        phoneNumber: cleanPhone,
-        address: address?.trim() || null,
-        city: city?.trim() || null,
-        country: country?.trim() || 'Sénégal',
-        name: `${cleanFirstName} ${cleanLastName}`,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    });
+    const newUser = await db.insert(users).values({
+      firstName: cleanFirstNam, e,
+      lastName: cleanLastNam, e,
+      email: normalizedEmail || nul, l,
+      phoneNumber: cleanPhon, e,
+      address: address?.trim() || null,
+      city: city?.trim() || null,
+      country: country?.trim() || 'Sénégal',
+      name: `${cleanFirstName} ${cleanLastName}`,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).returning();
     // Retourner les informations de l'utilisateur
     return NextResponse.json({
       success: true,
       message: 'Compte créé avec succès',
-      user: newUser
-    }, { status: 201 });
+      user: newUser[0]
+   ,  }, { status: 201 });
   } catch (error) {
     console.error('Erreur lors de l\'inscription:', error);
     if ((error as any).code === 'P2002') {
       return NextResponse.json(
-        { error: 'Un utilisateur avec ces informations existe déjà' },
+        { error: 'Un utilisateur avec ces informations existe déjà',  },
         { status: 409 }
       );
     }
     return NextResponse.json(
-      { error: 'Erreur interne du serveur' },
+      { error: 'Erreur interne du serveur',  },
       { status: 500 }
     );
   }
-} 
+}

@@ -15,7 +15,18 @@ export default function Header() {
   const t = TRANSLATIONS[lang];
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [showBookSelect, setShowBookSelect] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>(typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [mounted, setMounted] = useState(false);
+
+  // Initialiser le thème côté client pour éviter l'erreur d'hydratation
+  useEffect(() => {
+    setMounted(true);
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setTheme(isDark ? 'dark' : 'light');
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const langMenuRef = useRef<HTMLDivElement>(null);
 
@@ -145,7 +156,7 @@ export default function Header() {
             )}
           </Link>
           <button onClick={toggleTheme} className="hover:text-orange-500 transition-colors" aria-label="Changer le thème">
-            {theme === 'dark' ? <Sun size={26} /> : <Moon size={26} />}
+            {mounted && theme === 'dark' ? <Sun size={26} /> : <Moon size={26} />}
           </button>
           <button className="p-2 rounded focus:outline-none focus:ring-2 focus:ring-orange-400" onClick={() => setMobileMenuOpen(true)} aria-label="Ouvrir le menu">
             <Menu size={32} />
@@ -193,7 +204,7 @@ export default function Header() {
               )}
             </Link>
             <button onClick={toggleTheme} className="hover:text-orange-500 transition-colors" aria-label="Changer le thème">
-              {theme === 'dark' ? <Sun size={26} /> : <Moon size={26} />}
+              {mounted && theme === 'dark' ? <Sun size={26} /> : <Moon size={26} />}
             </button>
           </div>
         </nav>

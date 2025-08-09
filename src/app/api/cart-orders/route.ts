@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
+import { eq, desc, asc, and, or } from 'drizzle-orm';
+import { db } from '../../../db';
+import { users, books, personalizedOrders, cartOrders, contactMessages, values, characters } from '../../../db/schema';
 import { getServerSession } from 'next-auth';
-import { PrismaClient } from '@prisma/client';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { NextAuthOptions } from 'next-auth';
-
-const prisma = new PrismaClient();
-
 // Configuration authOptions inline
 const authOptions: NextAuthOptions = {
   providers: [
@@ -19,15 +18,10 @@ const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
-
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
-        });
-
+        const user = await db.select().from(users).where(eq(users.email, credentials.email )).limit(1).then(result => result[0] || null);
         if (!user || user.password !== credentials.password) {
           return null;
         }
-
         return {
           id: user.id,
           email: user.email,
@@ -48,50 +42,38 @@ const authOptions: NextAuthOptions = {
     }
   }
 };
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const guestToken = searchParams.get('guestToken');
   const userId = searchParams.get('userId');
   const phoneUserId = searchParams.get('phoneUserId');
-
-  let where: any = {};
   
   // Priorité : userId de la session, puis phoneUserId, puis userId des paramètres, puis guestToken
   const session = await getServerSession(authOptions);
+  let whereConditions = [eq(cartOrders.status, "IN_CART")];
+  
   if (session && session.user?.id) {
-    where.user = { id: session.user.id };
+    whereConditions.push(eq(cartOrders.userId, session.user.id));
   } else if (phoneUserId) {
-    // Pour l'authentification par téléphone, chercher par ID utilisateur
-    where.user = { id: phoneUserId };
+    whereConditions.push(eq(cartOrders.userId, phoneUserId));
   } else if (userId) {
-    where.user = { id: userId };
+    whereConditions.push(eq(cartOrders.userId, userId));
   } else if (guestToken) {
-    where.guestToken = guestToken;
+    whereConditions.push(eq(cartOrders.guestToken, guestToken));
   } else {
     return new NextResponse('Non authentifié et pas de guestToken', { status: 400 });
   }
-
-  // Ne récupérer que les commandes dans le panier
-  where.status = "IN_CART";
-
-  const orders = await prisma.cartOrder.findMany({
-    where,
-    include: { book: true }
-  });
-
+  
+  const orders = await db.select().from(cartOrders).where(and(...whereConditions));
   return NextResponse.json(orders);
 }
-
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     const body = await request.json();
     const { bookId, quantity = 1, guestToken, phoneUserId } = body;
-
     console.log('POST /api/cart-orders - Body:', body);
     console.log('POST /api/cart-orders - Session:', session);
-
     let userId = null;
     if (session && session.user?.id) {
       userId = session.user.id;
@@ -101,22 +83,16 @@ export async function POST(request: Request) {
       console.log('Utilisation phoneUserId:', userId);
     } else if (!guestToken) {
       console.log('Erreur: Non authentifié et pas de guestToken');
-      return new NextResponse('Non authentifié et pas de guestToken', { status: 400 });
+      return new NextResponse('Non authentifié et pas de guestToken, ', { status: 400 });
     }
-
     console.log('Final userId:', userId);
-
-    const newOrder = await prisma.cartOrder.create({
-      data: {
-        book: { connect: { id: Number(bookId) } },
-        quantity,
-        user: userId ? { connect: { id: userId } } : undefined,
-        guestToken: guestToken || null,
-        status: "IN_CART",
-      },
-      include: { book: true }
+    const newOrder = await db.insert(cartOrders).values({
+      bookId: Number(bookId),
+      quantity,
+      userId: userId || null,
+      guestToken: guestToken || null,
+      status: "IN_CART"
     });
-
     console.log('Commande créée avec succès:', newOrder);
     return NextResponse.json(newOrder, { status: 201 });
   } catch (e) {
@@ -124,63 +100,48 @@ export async function POST(request: Request) {
     return new NextResponse("Une erreur interne du serveur est survenue.", { status: 500 });
   }
 }
-
 export async function PUT(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     const body = await request.json();
     const { bookId, quantity, guestToken, phoneUserId } = body;
-
     console.log('PUT /api/cart-orders - Body:', body);
     console.log('PUT /api/cart-orders - Session:', session);
-
     if (!bookId || quantity === undefined) {
       console.log('Erreur: bookId et quantity requis');
       return new NextResponse('bookId et quantity requis', { status: 400 });
     }
-
-    let where: any = {};
+    
+    let whereConditions = [eq(cartOrders.status, "IN_CART"), eq(cartOrders.bookId, Number(bookId))];
     
     // Priorité : session, puis phoneUserId, puis guestToken
     if (session && session.user?.id) {
-      where.user = { id: session.user.id };
+      whereConditions.push(eq(cartOrders.userId, session.user.id));
       console.log('Utilisation session userId:', session.user.id);
     } else if (phoneUserId) {
-      where.user = { id: phoneUserId };
+      whereConditions.push(eq(cartOrders.userId, phoneUserId));
       console.log('Utilisation phoneUserId:', phoneUserId);
     } else if (guestToken) {
-      where.guestToken = guestToken;
+      whereConditions.push(eq(cartOrders.guestToken, guestToken));
       console.log('Utilisation guestToken:', guestToken);
     } else {
       console.log('Erreur: Non authentifié et pas de guestToken');
       return new NextResponse('Non authentifié et pas de guestToken', { status: 400 });
     }
-
-    // Ajouter le statut IN_CART et bookId pour identifier l'article
-    where.status = "IN_CART";
-    where.bookId = Number(bookId);
-
-    console.log('Condition WHERE pour mise à jour:', where);
-
+    
+    console.log('Conditions WHERE pour mise à jour:', whereConditions);
     // Mettre à jour la quantité
-    const updatedOrder = await prisma.cartOrder.updateMany({
-      where,
-      data: { quantity: Number(quantity) }
-    });
-
+    const updatedOrder = await db.update(cartOrders)
+      .set({ quantity: Number(quantity) })
+      .where(and(...whereConditions));
+    
     console.log('Commande mise à jour avec succès:', updatedOrder);
-    return NextResponse.json({ success: true, updatedCount: updatedOrder.count });
-
+    return NextResponse.json({ success: true, updated: true });
   } catch (error) {
     console.error("Erreur lors de la mise à jour de la commande :", error);
-    if ((error as any).code === 'P2025') { 
-        console.log('Erreur P2025: Commande non trouvée');
-        return new NextResponse("Commande non trouvée ou non autorisée.", { status: 404 });
-    }
     return new NextResponse("Erreur interne du serveur.", { status: 500 });
   }
 }
-
 export async function DELETE(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -190,69 +151,49 @@ export async function DELETE(request: Request) {
     const guestToken = searchParams.get('guestToken');
     const userId = searchParams.get('userId');
     const phoneUserId = searchParams.get('phoneUserId');
-
     console.log('DELETE /api/cart-orders - Paramètres:', { id, bookId, guestToken, userId, phoneUserId, sessionUser: session?.user?.id });
-
     if (!id && !bookId) {
       console.log('Erreur: ID de commande ou bookId manquant');
       return new NextResponse('ID de commande ou bookId manquant', { status: 400 });
     }
-
-    let where: any = {};
+    
+    let whereConditions = [eq(cartOrders.status, "IN_CART")];
     
     // Priorité : session, puis phoneUserId, puis userId, puis guestToken
     if (session && session.user?.id) {
-      where.user = { id: session.user.id };
+      whereConditions.push(eq(cartOrders.userId, session.user.id));
       console.log('Utilisation session userId:', session.user.id);
     } else if (phoneUserId) {
-      where.user = { id: phoneUserId };
+      whereConditions.push(eq(cartOrders.userId, phoneUserId));
       console.log('Utilisation phoneUserId:', phoneUserId);
     } else if (userId) {
-      where.user = { id: userId };
+      whereConditions.push(eq(cartOrders.userId, userId));
       console.log('Utilisation userId:', userId);
     } else if (guestToken) {
-      where.guestToken = guestToken;
+      whereConditions.push(eq(cartOrders.guestToken, guestToken));
       console.log('Utilisation guestToken:', guestToken);
     } else {
       console.log('Erreur: Non authentifié et pas de guestToken');
       return new NextResponse('Non authentifié et pas de guestToken', { status: 400 });
     }
-
-    // Ajouter le statut IN_CART pour s'assurer qu'on ne supprime que les articles du panier
-    where.status = "IN_CART";
-
+    
     // Si on a un ID de commande, l'utiliser pour une suppression unique
     if (id) {
-      where.id = Number(id);
-      console.log('Condition WHERE pour suppression unique:', where);
-      
-      const deleteResult = await prisma.cartOrder.deleteMany({
-        where,
-      });
-      
-      if (deleteResult.count === 0) {
-        console.log('Aucune commande trouvée pour suppression, mais on considère que c\'est OK');
-        return new NextResponse(null, { status: 204 });
-      }
+      whereConditions.push(eq(cartOrders.id, Number(id)));
+      console.log('Condition WHERE pour suppression unique:', whereConditions);
+      const deleteResult = await db.delete(cartOrders).where(and(...whereConditions));
+      console.log('Commande supprimée avec succès');
     } else if (bookId) {
       // Sinon, chercher par bookId et supprimer toutes les occurrences
-      where.bookId = Number(bookId);
-      console.log('Condition WHERE pour suppression multiple:', where);
-      
-      await prisma.cartOrder.deleteMany({
-        where,
-      });
+      whereConditions.push(eq(cartOrders.bookId, Number(bookId)));
+      console.log('Condition WHERE pour suppression multiple:', whereConditions);
+      await db.delete(cartOrders).where(and(...whereConditions));
+      console.log('Commandes supprimées avec succès');
     }
-
-    console.log('Commande(s) supprimée(s) avec succès');
+    
     return new NextResponse(null, { status: 204 });
-
   } catch (error) {
     console.error("Erreur lors de la suppression d'une commande :", error);
-    if ((error as any).code === 'P2025') { 
-        console.log('Erreur P2025: Commande non trouvée');
-        return new NextResponse("Commande non trouvée ou non autorisée.", { status: 404 });
-    }
     return new NextResponse("Erreur interne du serveur.", { status: 500 });
   }
-} 
+}

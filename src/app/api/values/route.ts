@@ -1,10 +1,11 @@
 // src/app/api/values/route.ts
 import { NextResponse } from 'next/server';
-import prisma from '../../../../lib/prisma';
+import { db } from '../../../db';
+import { values } from '../../../db/schema';
 
 export async function GET() {
   try {
-    const values = await prisma.value.findMany();
+    const valuesResult = await db.select().from(values);
     
     // Dictionnaire de traductions pour chaque valeur
     const translations: Record<string, { en: string; de: string; es: string; ar: string }> = {
@@ -65,8 +66,8 @@ export async function GET() {
     };
     
     // Transformer les données pour correspondre au format attendu par le composant
-    const transformedValues = values.map(value => {
-      const frenchName = (value as any).name || '';
+    const transformedValues = valuesResult.map(value => {
+      const frenchName = (value as any).name_fr || '';
       const translation = translations[frenchName] || { en: frenchName, de: frenchName, es: frenchName, ar: frenchName };
       
       return {

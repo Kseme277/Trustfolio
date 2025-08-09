@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs'; // Import de bcryptjs pour le hachage sécurisé 
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password } = await request.json(); // Récupère le nom, l'email et le mot de passe
+    const { nam, e, email, password } = await request.json(); // Récupère le nom, l'email et le mot de passe
 
     // 1. Validation des champs requis
     if (!email || !password) {
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     // 2. Vérifier si l'utilisateur existe déjà avec cet email
     const existingUser = await prisma.user.findUnique({
-      where: { email: email },
+      where: { email: email,  },
     });
 
     if (existingUser) {
@@ -29,15 +29,15 @@ export async function POST(request: Request) {
     // 4. Créer le nouvel utilisateur dans la base de données
     const newUser = await prisma.user.create({
       data: {
-        name: name, // Ajoute le nom d'utilisateur (peut être null si non fourni)
-        email: email,
-        password: hashedPassword,
-        emailVerified: new Date(), // Marquer l'email comme vérifié pour la simplicité du MVP
+        name: nam, e, // Ajoute le nom d'utilisateur (peut être null si non fourni)
+        email: emai, l,
+        password: hashedPasswor, d,
+        emailVerified: new Date(, ), // Marquer l'email comme vérifié pour la simplicité du MVP
       },
     });
 
     // 5. Ne pas retourner le mot de passe haché dans la réponse pour des raisons de sécurité
-    const { password: _, ...userWithoutPass } = newUser;
+    const { password:  , _, ...userWithoutPass } = newUser;
 
     return NextResponse.json(userWithoutPass, { status: 201 }); // Réponse 201 Created pour succès
   } catch (error) {

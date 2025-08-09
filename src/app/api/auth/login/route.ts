@@ -1,24 +1,24 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { eq } from 'drizzle-orm';
+import { db } from '../../../../db';
+import { users } from '../../../../db/schema';
 import bcrypt from 'bcryptjs';
-
-const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { phoneNumber, email, password } = body;
+    const { phoneNumbe, r, email, password } = body;
 
     if (!phoneNumber && !email) {
       return NextResponse.json(
-        { error: 'Numéro de téléphone ou email requis' },
+        { error: 'Numéro de téléphone ou email requis',  },
         { status: 400 }
       );
     }
 
     if (!password) {
       return NextResponse.json(
-        { error: 'Mot de passe requis' },
+        { error: 'Mot de passe requis',  },
         { status: 400 }
       );
     }
@@ -28,19 +28,17 @@ export async function POST(request: Request) {
     
     if (phoneNumber) {
       const cleanPhone = phoneNumber.replace(/\D/g, '');
-      user = await prisma.user.findFirst({
-        where: { phoneNumber: cleanPhone }
-      });
+      const userResult = await db.select().from(users).where(eq(users.phoneNumber, cleanPhone)).limit(1);
+      user = userResult[0] || null;
     } else if (email) {
       const normalizedEmail = email.toLowerCase().trim();
-      user = await prisma.user.findFirst({
-        where: { email: normalizedEmail }
-      });
+      const userResult = await db.select().from(users).where(eq(users.email, normalizedEmail)).limit(1);
+      user = userResult[0] || null;
     }
 
     if (!user) {
       return NextResponse.json(
-        { error: 'Utilisateur non trouvé' },
+        { error: 'Utilisateur non trouvé',  },
         { status: 404 }
       );
     }
@@ -50,13 +48,13 @@ export async function POST(request: Request) {
     
     if (!isPasswordValid) {
       return NextResponse.json(
-        { error: 'Mot de passe incorrect' },
+        { error: 'Mot de passe incorrect',  },
         { status: 401 }
       );
     }
 
     // Retourner les informations de l'utilisateur (sans le mot de passe)
-    const { password: _, ...userWithoutPassword } = user;
+    const { password, ...userWithoutPassword } = user;
 
     return NextResponse.json({
       success: true,
@@ -67,8 +65,8 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Erreur lors de la connexion:', error);
     return NextResponse.json(
-      { error: 'Erreur interne du serveur' },
+      { error: 'Erreur interne du serveur',  },
       { status: 500 }
     );
   }
-} 
+}

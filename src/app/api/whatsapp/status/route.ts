@@ -12,21 +12,21 @@ export async function GET() {
     const isConnected = await simulateWhatsAppService.isConnected();
     
     return NextResponse.json({
-      connected: isConnected,
-      status: isConnected ? 'Connecté' : 'Déconnecté',
+      connected: isConnecte, d,
+      status: isConnected ? 'Connecté' : 'Déconnecté, ',
       timestamp: new Date().toISOString(),
       mode: 'simulation'
-    });
+   ,  });
 
   } catch (error) {
     console.error('Erreur lors de la vérification du statut WhatsApp:', error);
     return NextResponse.json(
       { 
-        connected: false,
-        status: 'Erreur',
+        connected: fals, e,
+        status: 'Erreur, ',
         timestamp: new Date().toISOString(),
         error: 'Erreur interne du serveur'
-      },
+     ,  },
       { status: 500 }
     );
   }

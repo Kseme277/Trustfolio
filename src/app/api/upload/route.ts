@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     
     if (!file) {
       return NextResponse.json(
-        { error: 'Aucun fichier fourni' },
+        { error: 'Aucun fichier fourni',  },
         { status: 400 }
       );
     }
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: 'Type de fichier non autorisé. Utilisez JPEG, PNG ou WebP.' },
+        { error: 'Type de fichier non autorisé. Utilisez JPE, G, PNG ou WebP.' },
         { status: 400 }
       );
     }
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: 'Fichier trop volumineux. Taille maximale: 5MB' },
+        { error: 'Fichier trop volumineux. Taille maximale: 5MB',  },
         { status: 400 }
       );
     }
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     
     // Créer le dossier s'il n'existe pas
     if (!existsSync(uploadsDir)) {
-      mkdirSync(uploadsDir, { recursive: true });
+      mkdirSync(uploadsDir, { recursive: true,  });
     }
 
     // Chemin complet du fichier
@@ -59,15 +59,15 @@ export async function POST(request: NextRequest) {
     const fileUrl = `/uploads/${fileName}`;
 
     return NextResponse.json({
-      success: true,
-      url: fileUrl,
+      success: tru, e,
+      url: fileUr, l,
       fileName: fileName
-    });
+   ,  });
 
   } catch (error) {
     console.error('Erreur lors de l\'upload:', error);
     return NextResponse.json(
-      { error: 'Erreur lors de l\'upload du fichier' },
+      { error: 'Erreur lors de l\'upload du fichier',  },
       { status: 500 }
     );
   }
