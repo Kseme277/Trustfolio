@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Personnalisation de livre</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .option {
+            border: 2px solid #fed7aa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .option:hover {
+            background-color: #fff7ed;
+            border-color: #fb923c;
+            transform: scale(1.02);
+        }
+        .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        h1 {
+            color: #ea580c;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h3 {
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+        .success {
+            background-color: #d1fae5;
+            border: 2px solid #10b981;
+            color: #065f46;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Test - Personnalisation de livre</h1>
+        <p style="text-align: center; margin-bottom: 40px;">
+            Choisissez votre méthode de personnalisation
+        </p>
+        
+        <div class="option" onclick="selectOption('existing')">
+            <div class="icon">📚</div>
+            <h3>À partir d'un livre existant</h3>
+            <p>Personnalisez un de nos livres existants avec vos propres détails</p>
+        </div>
+        
+        <div class="option" onclick="selectOption('scratch')">
+            <div class="icon">➕</div>
+            <h3>Créer à partir de rien</h3>
+            <p>Créez un livre entièrement nouveau avec votre propre histoire</p>
+        </div>
+        
+        <div id="success" class="success">
+            <strong>✅ Fonctionnalité testée avec succès !</strong>
+            <p id="result-text"></p>
+        </div>
+    </div>
+
+    <script>
+        function selectOption(type) {
+            const successDiv = document.getElementById('success');
+            const resultText = document.getElementById('result-text');
+            
+            if (type === 'existing') {
+                resultText.innerHTML = 'Redirection vers la sélection de livres existants... <br>Route: <code>/personaliser</code> → Modal de sélection → <code>/personaliser/[id]</code>';
+            } else if (type === 'scratch') {
+                resultText.innerHTML = 'Redirection vers la création personnalisée... <br>Route: <code>/personaliser/nouveau</code>';
+            }
+            
+            successDiv.style.display = 'block';
+            
+            // Simuler une redirection après 2 secondes
+            setTimeout(() => {
+                if (type === 'existing') {
+                    alert('🎯 Test réussi ! Dans l\'application réelle, ceci ouvrirait la modal de sélection de livres existants.');
+                } else {
+                    alert('🎯 Test réussi ! Dans l\'application réelle, ceci redirigerait vers /personaliser/nouveau');
+                }
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

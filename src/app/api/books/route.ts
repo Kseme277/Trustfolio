@@ -40,8 +40,20 @@ export async function GET(request: Request) {
     }
 
     // Récupère les livres depuis la base de données en appliquant la clause de tri
-    let query = db.select().from(books);
-    
+    // Sélectionne uniquement les colonnes de base qui existent dans la DB actuelle
+    let query = db.select({
+      id: books.id,
+      title: books.title,
+      description: books.description,
+      shortDescription: books.shortDescription,
+      coverImage: books.coverImage,
+      price: books.price,
+      tags: books.tags,
+      pdfUrl: books.pdfUrl,
+      createdAt: books.createdAt,
+      updatedAt: books.updatedAt
+    }).from(books);
+
     if (sortBy === 'createdAt') {
       query = order === 'asc' ? query.orderBy(asc(books.createdAt)) : query.orderBy(desc(books.createdAt));
     } else if (sortBy === 'price') {
@@ -49,7 +61,7 @@ export async function GET(request: Request) {
     } else {
       query = query.orderBy(desc(books.createdAt));
     }
-    
+
     const booksResult = await query;
 
     return NextResponse.json(booksResult); // Retourne les livres au format JSON

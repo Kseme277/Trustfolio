@@ -116,12 +116,13 @@ export default function Home() {
       <VirtuesBar />
 
       {/* Section Commentaires modernisée */}
+      
       <section id="testimonials" className="w-full max-w-7xl mx-auto px-4 py-16">
         <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-10 text-center">
           {t.testimonialsTitle || 'Ils en parlent mieux que nous'}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {/* Exemple de témoignage modernisé */}
+        
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 flex flex-col items-center text-center">
             <img src="/ines-murielle.jpg" alt="Témoin 1" className="w-16 h-16 rounded-full object-cover mb-4 border-2 border-orange-400" />
             <blockquote className="text-lg italic text-gray-700 dark:text-gray-200 mb-2">
@@ -154,6 +155,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      {/* <Testimonials /> */}
       
       {/* Section Appel à l'Action Finale avec Animation d'entrée au défilement */}
       <AnimateOnScroll delay={0.25}>
